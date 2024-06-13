@@ -22,21 +22,18 @@ class Borrowing(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"{self.book}: from {self.borrow_date} "
-            f"to {self.expected_return_date}."
+            f"Book: {self.book.title}, Author: {self.book.author}. "
+            f"Borrowed from {self.borrow_date} to {self.expected_return_date}."
         )
 
-    def clean(self):
-        if (self.actual_return_date
-                and self.actual_return_date < self.borrow_date):
-            raise ValidationError(
-                "Actual return date cannot be before the borrow date."
-            )
-        if self.expected_return_date < self.borrow_date:
-            raise ValidationError(
-                "Expected return date cannot be before the borrow date."
-            )
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(expected_return_date__gte=models.F("borrow_date")),
+                name="expected_return_date_gte_borrow_date"
+            ),
+            models.CheckConstraint(
+                check=models.Q(actual_return_date__gte=models.F("borrow_date")),
+                name="actual_return_date_gte_borrow_date"
+            ),
+        ]
