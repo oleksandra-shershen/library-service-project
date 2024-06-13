@@ -12,7 +12,7 @@ class BookTest(APITestCase):
             "author": "Test Author",
             "cover": "HARD",
             "inventory": "5",
-            "daily_fee": 2.99
+            "daily_fee": 2.99,
         }
         self.book = Book.objects.create(**self.book_data)
 
@@ -23,7 +23,7 @@ class BookTest(APITestCase):
             "author": "New Author",
             "cover": "SOFT",
             "inventory": "15",
-            "daily_fee": 12.99
+            "daily_fee": 12.99,
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -57,7 +57,7 @@ class BookTest(APITestCase):
             "author": "Update Author",
             "cover": "SOFT",
             "inventory": "1",
-            "daily_fee": 3.49
+            "daily_fee": 3.49,
         }
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
