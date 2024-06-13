@@ -30,10 +30,14 @@ class BookTest(APITestCase):
         self.assertEqual(Book.objects.count(), 2)
         self.assertEqual(Book.objects.get(id=response.data["id"]).title, "New Book")
 
-
     def test_list_books(self):
         url = reverse("library:book-list")
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
+    def test_get_book(self):
+        url = reverse("library:book-detail", kwargs={"pk": self.book.id})
+        response = self.client.get(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Test Book")
