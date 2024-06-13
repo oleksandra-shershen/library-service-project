@@ -41,3 +41,11 @@ class BookTest(APITestCase):
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], "Test Book")
+
+    def test_partial_update_book(self):
+        url = reverse("library:book-detail", kwargs={"pk": self.book.id})
+        data = {"title": "Update Book"}
+        response = self.client.patch(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.book.refresh_from_db()
+        self.assertEqual(response.data["title"], "Update Book")
