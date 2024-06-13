@@ -62,3 +62,9 @@ class BookTest(APITestCase):
         response = self.client.put(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], "Update Book")
+
+    def test_delete_book(self):
+        url = reverse("library:book-detail", kwargs={"pk": self.book.id})
+        response = self.client.delete(url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Book.objects.count(), 0)
