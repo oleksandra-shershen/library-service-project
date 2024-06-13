@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # External apps
-    'rest_framework_simplejwt'
-    
+    'rest_framework_simplejwt',
+    'rest_framework',
+
     # User apps
     'library',
     'borrowing',
