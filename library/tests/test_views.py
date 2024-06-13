@@ -49,3 +49,16 @@ class BookTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.book.refresh_from_db()
         self.assertEqual(response.data["title"], "Update Book")
+
+    def test_update_book(self):
+        url = reverse("library:book-detail", kwargs={"pk": self.book.id})
+        data = {
+            "title": "Update Book",
+            "author": "Update Author",
+            "cover": "SOFT",
+            "inventory": "1",
+            "daily_fee": 3.49
+        }
+        response = self.client.put(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], "Update Book")
