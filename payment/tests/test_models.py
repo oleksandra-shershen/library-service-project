@@ -43,3 +43,9 @@ class PaymentModelTest(TestCase):
         self.assertEqual(self.payment.money_to_pay, 15.00)
         self.assertIsNotNone(self.payment.created_at)
         self.assertIsNotNone(self.payment.updated_at)
+
+    def test_payment_str(self):
+        expected_str = (
+            f"{self.borrowing.book.title} - {self.payment.get_status_display()}"
+        )
+        self.assertEqual(str(self.payment), expected_str)
