@@ -17,8 +17,10 @@ TELEGRAM_API_URL = (
 def send_telegram_notification(sender, instance, created, **kwargs):
     if created:
         users = User.objects.exclude(telegram_chat_id__isnull=True)
-        message = (f"New book added: {instance.title} by {instance.author}. "
-                   f"Price: ${instance.daily_fee}")
+        message = (
+            f"New book added: {instance.title} by {instance.author}. "
+            f"Price: ${instance.daily_fee}"
+        )
         for user in users:
             chat_id = user.telegram_chat_id
             if chat_id:
