@@ -28,11 +28,15 @@ class Borrowing(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(expected_return_date__gte=models.F("borrow_date")),
+                check=models.Q(
+                    expected_return_date__gte=models.F("borrow_date")
+                ),
                 name="expected_return_date_gte_borrow_date"
             ),
             models.CheckConstraint(
-                check=models.Q(actual_return_date__gte=models.F("borrow_date")),
+                check=models.Q(
+                    actual_return_date__gte=models.F("borrow_date")
+                ),
                 name="actual_return_date_gte_borrow_date"
             ),
         ]
