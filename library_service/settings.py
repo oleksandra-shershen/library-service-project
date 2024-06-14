@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework",
     # User apps
-    "library",
+    "library.apps.LibraryConfig",
     "borrowing",
     "payment",
     "user",
@@ -161,3 +161,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=25),
     "ROTATE_REFRESH_TOKENS": False,
 }
+
+# Telegram Bot Token
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
