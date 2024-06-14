@@ -34,7 +34,11 @@ class BorrowingViewSet(
     @action(detail=True, methods=["POST"], url_path="return")
     def return_borrowing(self, request, pk=None):
         borrowing = self.get_object()
-        serializer = self.get_serializer(borrowing, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            borrowing,
+            data=request.data,
+            partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
