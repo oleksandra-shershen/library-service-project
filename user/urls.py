@@ -13,7 +13,6 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("me/", ManageUserView.as_view(), name="manage_user"),
-    path('save-chat-id/', SaveChatIdView.as_view(), name='save-chat-id'),
-
+    path("save-chat-id/", SaveChatIdView.as_view(), name="save-chat-id"),
 ]
 app_name = "user"

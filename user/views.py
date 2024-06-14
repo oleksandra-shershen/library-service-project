@@ -27,13 +27,18 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 class SaveChatIdView(APIView):
 
     def post(self, request):
-        email = request.data.get('email')
-        chat_id = request.data.get('chat_id')
+        email = request.data.get("email")
+        chat_id = request.data.get("chat_id")
 
         user = User.objects.filter(email=email).first()
         if user:
             user.telegram_chat_id = chat_id
             user.save()
-            return Response({"message": "Chat ID saved successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Chat ID saved successfully"},
+                status=status.HTTP_200_OK,
+            )
         else:
-            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"message": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
