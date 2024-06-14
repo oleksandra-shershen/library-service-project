@@ -4,6 +4,7 @@ from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
     BorrowingDetailSerializer,
+    BorrowingCreateSerializer,
 )
 
 
@@ -21,4 +22,6 @@ class BorrowViewSet(
             return BorrowingListSerializer
         elif self.action == "retrieve":
             return BorrowingDetailSerializer
+        elif self.action == "create":
+            return BorrowingCreateSerializer
         return self.serializer_class

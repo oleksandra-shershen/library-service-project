@@ -16,22 +16,6 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "book",
             "user",
         )
-        read_only_fields = ("borrow_date", "user")
-
-    def validate(self, attrs):
-        book = attrs.get("book")
-        if book.inventory < 1:
-            raise ValidationError("This book is not available for borrowing.")
-        return attrs
-
-    def create(self, validated_data):
-        book = validated_data["book"]
-        book.inventory -= 1
-        book.save()
-
-        validated_data["user"] = self.context["request"].user
-        borrowing = super().create(validated_data)
-        return borrowing
 
 
 class BorrowingListSerializer(serializers.ModelSerializer):
@@ -66,3 +50,34 @@ class BorrowingDetailSerializer(serializers.ModelSerializer):
             "actual_return_date",
             "payments",
         )
+
+
+class BorrowingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Borrowing
+        fields = (
+            "id",
+            "borrow_date",
+            "expected_return_date",
+            "actual_return_date",
+            "book",
+            "user",
+        )
+        read_only_fields = ("borrow_date", "user")
+
+    def validate(self, attrs):
+        book = attrs.get("book")
+        if book.inventory < 1:
+            raise ValidationError("This book is not available for borrowing.")
+        return attrs
+
+    def create(self, validated_data):
+        book = validated_data["book"]
+        book.inventory -= 1
+        book.save()
+
+        validated_data["user"] = self.context["request"].user
+        borrowing = super().create(validated_data)
+        return borrowing
+
+
