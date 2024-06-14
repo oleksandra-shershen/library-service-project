@@ -79,5 +79,3 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         validated_data["user"] = self.context["request"].user
         borrowing = super().create(validated_data)
         return borrowing
-
-
