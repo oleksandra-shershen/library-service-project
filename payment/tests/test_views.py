@@ -65,13 +65,10 @@ class PaymentViewSetTest(APITestCase):
 
     def test_regular_user_can_not_view_other_payments(self):
         another_user = User.objects.create_user(
-            email="enouther_user@example.com",
-            password="anotherpass"
+            email="enouther_user@example.com", password="anotherpass"
         )
         another_borrowing = Borrowing.objects.create(
-            user=another_user,
-            book=self.book,
-            expected_return_date="2024-07-01"
+            user=another_user, book=self.book, expected_return_date="2024-07-01"
         )
         another_payment = Payment.objects.create(
             borrowing=another_borrowing,
@@ -85,3 +82,35 @@ class PaymentViewSetTest(APITestCase):
         response = self.client.get(self.payment_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+    def test_create_payment(self):
+        self.authenticate(self.regular_user)
+        data = {
+            "borrowing": self.borrowing.id,
+            "status": "PAID",
+            "type": "FINE",
+            "session_url": "https://example.com/",
+            "session_id": "id_1111",
+            "money_to_pay": 15.00,
+        }
+        response = self.client.post(self.payment_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Payment.objects.count(), 2)
+
+    def test_update_payment(self):
+        self.authenticate(self.admin_user)
+        payment_detail_url = reverse(
+            "payment:payment-detail", kwargs={"pk": self.payment.id}
+        )
+        data = {
+            "borrowing": self.borrowing.id,
+            "status": "PAID",
+            "type": "PAYMENT",
+            "session_url": self.payment.session_url,
+            "session_id": self.payment.session_id,
+            "money_to_pay": self.payment.money_to_pay,
+        }
+        response = self.client.put(payment_detail_url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.payment.refresh_from_db()
+        self.assertEqual(self.payment.status, "PAID")
