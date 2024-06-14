@@ -14,9 +14,15 @@ class Payment(models.Model):
         ("FINE", "Fine"),
     ]
 
-    status = models.CharField(max_length=7, choices=STATUS_CHOICES, default="PENDING")
-    type = models.CharField(max_length=7, choices=TYPE_CHOICES, default="PAYMENT")
-    borrowing = models.ForeignKey(Borrowing, on_delete=models.CASCADE, related_name="payments")
+    status = models.CharField(
+        max_length=7, choices=STATUS_CHOICES, default="PENDING"
+    )
+    type = models.CharField(
+        max_length=7, choices=TYPE_CHOICES, default="PAYMENT"
+    )
+    borrowing = models.ForeignKey(
+        Borrowing, on_delete=models.CASCADE, related_name="payments"
+    )
     session_url = models.URLField()
     session_id = models.CharField(max_length=255)
     money_to_pay = models.DecimalField(decimal_places=2, max_digits=10)
