@@ -10,7 +10,8 @@ User = get_user_model()
 class PaymentModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="testuser@example.com", password="testpassword"
+            email="testuser@example.com",
+            password="testpassword",
         )
 
         self.book = Book.objects.create(
