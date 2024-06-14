@@ -3,7 +3,7 @@ from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
-    BorrowingDetailSerializer
+    BorrowingDetailSerializer,
 )
 
 

@@ -28,9 +28,7 @@ class UserAdmin(DjangoUserAdmin):
         (
             None,
             {
-                "classes": (
-                    "wide",
-                ),
+                "classes": ("wide",),
                 "fields": (
                     "email",
                     "password1",
@@ -44,13 +42,7 @@ class UserAdmin(DjangoUserAdmin):
         "first_name",
         "last_name",
         "is_staff",
-        "is_active"
+        "is_active",
     )
-    search_fields = (
-        "email",
-        "first_name",
-        "last_name"
-    )
-    ordering = (
-        "email",
-    )
+    search_fields = ("email", "first_name", "last_name")
+    ordering = ("email",)

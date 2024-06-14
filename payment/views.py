@@ -15,7 +15,9 @@ class PaymentViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Payment.objects.all().select_related("borrowing__book", "borrowing__user")
+    queryset = Payment.objects.all().select_related(
+        "borrowing__book", "borrowing__user"
+    )
     serializer_class = PaymentSerializer
 
     def get_serializer_class(self):
