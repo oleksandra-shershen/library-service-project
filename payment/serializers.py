@@ -9,7 +9,7 @@ class PaymentSerializer(serializers.ModelSerializer):
             "id",
             "borrowing",
             "status",
-            "type",
+            "payment_type",
             "session_url",
             "session_id",
             "money_to_pay",
@@ -31,7 +31,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "book",
             "user",
             "status",
-            "type",
+            "payment_type",
             "money_to_pay",
         )
 
@@ -49,7 +49,7 @@ class PaymentDetailSerializer(serializers.ModelSerializer):
             "book",
             "user",
             "status",
-            "type",
+            "payment_type",
             "session_url",
             "session_id",
             "money_to_pay",
