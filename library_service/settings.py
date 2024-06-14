@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # External apps
+    'rest_framework_simplejwt',
     'rest_framework',
+
+    # User apps
     'library',
     'borrowing',
     'payment',
