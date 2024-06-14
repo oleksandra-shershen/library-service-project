@@ -14,11 +14,11 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: library-service-project
-          POSTGRES_USER: library-service-project
-          POSTGRES_PASSWORD: library-service-project
+          POSTGRES_DB: library_service_db
+          POSTGRES_USER: library_service_user
+          POSTGRES_PASSWORD: library_service_password
         options: >-
-          --health-cmd="pg_isready -U ${{ secrets.POSTGRES_USER }}" 
+          --health-cmd="pg_isready -U library_service_user" 
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -26,10 +26,10 @@ jobs:
           - 5432:5432
 
     env:
-      POSTGRES_DB: library-service-project
-      POSTGRES_USER: library-service-project
-      POSTGRES_PASSWORD: library-service-project
-      POSTGRES_HOST: db
+      POSTGRES_DB: library_service_db
+      POSTGRES_USER: library_service_user
+      POSTGRES_PASSWORD: library_service_password
+      POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       PGDATA: /var/lib/postgresql/data
 
