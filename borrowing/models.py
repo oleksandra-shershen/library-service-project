@@ -1,4 +1,7 @@
+from datetime import timezone
+
 from django.db import models
+from rest_framework.exceptions import ValidationError
 
 from library.models import Book
 from library_service import settings
@@ -40,3 +43,11 @@ class Borrowing(models.Model):
                 name="actual_return_date_gte_borrow_date",
             ),
         ]
+
+    def return_borrowing(self):
+        if self.actual_return_date is not None:
+            raise ValidationError("This borrowing has already been returned.")
+        self.actual_return_date = timezone.now().date()
+        self.book.inventory += 1
+        self.book.save()
+        self.save()
