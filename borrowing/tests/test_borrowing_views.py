@@ -37,15 +37,22 @@ class BorrowingFilterTests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_list_borrowings(self):
-        url = reverse('borrowing:borrowing-list')
+        url = reverse("borrowing:borrowing-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
     def test_filter_by_user_id_as_staff(self):
-        url = reverse('borrowing:borrowing-list') + '?user_id=' + str(self.user.id)
+        url = (
+            reverse("borrowing:borrowing-list")
+            + "?user_id="
+            + str(self.user.id)
+        )
         staff_user = User.objects.create_user(
-            first_name="Staff", last_name="User", email="staff@example.com", is_staff=True
+            first_name="Staff",
+            last_name="User",
+            email="staff@example.com",
+            is_staff=True,
         )
         self.client.force_authenticate(user=staff_user)
         response = self.client.get(url)
@@ -53,25 +60,29 @@ class BorrowingFilterTests(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_filter_by_user_id_as_non_staff(self):
-        url = reverse('borrowing:borrowing-list') + '?user_id=' + str(self.user.id)
+        url = (
+            reverse("borrowing:borrowing-list")
+            + "?user_id="
+            + str(self.user.id)
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
     def test_filter_by_is_active_true(self):
-        url = reverse('borrowing:borrowing-list') + '?is_active=true'
+        url = reverse("borrowing:borrowing-list") + "?is_active=true"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
     def test_filter_by_is_active_false(self):
-        url = reverse('borrowing:borrowing-list') + '?is_active=false'
+        url = reverse("borrowing:borrowing-list") + "?is_active=false"
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
     def test_no_filter_params(self):
-        url = reverse('borrowing:borrowing-list')
+        url = reverse("borrowing:borrowing-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
