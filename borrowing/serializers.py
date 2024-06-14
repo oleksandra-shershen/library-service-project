@@ -1,8 +1,7 @@
 from rest_framework import serializers
-
+from borrowing.models import Borrowing
 from library.serializers import BookSerializer
 from payment.serializers import PaymentSerializer
-from borrowing.models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -48,4 +47,36 @@ class BorrowingDetailSerializer(serializers.ModelSerializer):
             "borrow_date",
             "expected_return_date",
             "actual_return_date",
+            "payments",
         )
+
+
+class BorrowingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Borrowing
+        fields = (
+            "id",
+            "borrow_date",
+            "expected_return_date",
+            "actual_return_date",
+            "book",
+            "user",
+        )
+        read_only_fields = ("borrow_date", "user")
+
+    def validate(self, attrs):
+        book = attrs["book"]
+        if book.inventory <= 0:
+            raise serializers.ValidationError(
+                "This book is currently not available for borrowing."
+            )
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        book = validated_data["book"]
+        book.inventory -= 1
+        book.save()
+
+        borrowing = Borrowing.objects.create(user=user, **validated_data)
+        return borrowing
