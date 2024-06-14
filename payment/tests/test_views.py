@@ -62,3 +62,26 @@ class PaymentViewSetTest(APITestCase):
         response = self.client.get(self.payment_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+    def test_regular_user_can_not_view_other_payments(self):
+        another_user = User.objects.create_user(
+            email="enouther_user@example.com",
+            password="anotherpass"
+        )
+        another_borrowing = Borrowing.objects.create(
+            user=another_user,
+            book=self.book,
+            expected_return_date="2024-07-01"
+        )
+        another_payment = Payment.objects.create(
+            borrowing=another_borrowing,
+            status="PENDING",
+            type="PAYMENT",
+            session_url="https://example.com/",
+            session_id="id_8889",
+            money_to_pay=15.00,
+        )
+        self.authenticate(self.regular_user)
+        response = self.client.get(self.payment_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
