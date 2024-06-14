@@ -5,8 +5,6 @@ services:
     container_name: library-service-project
     env_file:
       - .env
-    environment:
-      - TOKEN=${TOKEN}
     ports:
       - "8000:8000"
     volumes:
@@ -15,7 +13,22 @@ services:
       sh -c "
       python manage.py wait_for_db
       && python manage.py migrate
-      && python manage.py runserver 0.0.0.0:8000 &
+      && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+
+  telegram-bot:
+    build:
+      context: .
+    container_name: telegram-bot
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=library_service.settings
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "
       python telegram_bot.py"
     depends_on:
       - db
