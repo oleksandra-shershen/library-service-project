@@ -1,7 +1,11 @@
 from rest_framework import viewsets, mixins
 
 from payment.models import Payment
-from payment.serializers import PaymentSerializer, PaymentListSerializer
+from payment.serializers import (
+    PaymentSerializer,
+    PaymentListSerializer,
+    PaymentDetailSerializer,
+)
 
 
 class PaymentViewSet(
@@ -11,9 +15,12 @@ class PaymentViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Payment.objects.select_related("borrowing__book", "borrowing__user")
+    queryset = Payment.objects.all().select_related("borrowing__book", "borrowing__user")
+    serializer_class = PaymentSerializer
 
     def get_serializer_class(self):
-        if self.action in ["retrieve", "list"]:
+        if self.action == "list":
             return PaymentListSerializer
-        return PaymentSerializer
+        elif self.action == "retrieve":
+            return PaymentDetailSerializer
+        return self.serializer_class
