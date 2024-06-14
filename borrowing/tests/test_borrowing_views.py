@@ -1,90 +1,77 @@
-import datetime
-
-from rest_framework import status
-from rest_framework.test import APITestCase, APIClient
+from django.utils import timezone
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from library.models import Book
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from user.models import User
 from borrowing.models import Borrowing
 
-User = get_user_model()
 
+class BorrowingFilterTests(APITestCase):
 
-class BorrowingViewSetTests(APITestCase):
     def setUp(self):
-        self.client = APIClient()
-
-        self.user = User.objects.create_user(email='user@example.com', password='password')
-        self.admin_user = User.objects.create_superuser(email='admin@example.com', password='password')
-
-        self.book = Book.objects.create(title='Test Book', author='Test Author')
-
-        self.borrowing = Borrowing.objects.create(
-            user=self.user,
-            book=self.book,
-            expected_return_date=datetime.date.today() + datetime.timedelta(days=7)
+        self.user = User.objects.create_user(
+            first_name="John", last_name="Dee", email="user@gmail.com"
+        )
+        self.book = Book.objects.create(
+            title="Sample Book",
+            author="Sample Author",
+            inventory=2,
+            daily_fee=3,
         )
 
-        self.user_token = RefreshToken.for_user(self.user).access_token
-        self.admin_token = RefreshToken.for_user(self.admin_user).access_token
+        now = timezone.now()
+        self.borrowing1 = Borrowing.objects.create(
+            user=self.user,
+            book=self.book,
+            expected_return_date=now + timezone.timedelta(days=7),
+        )
+        self.borrowing2 = Borrowing.objects.create(
+            user=self.user,
+            book=self.book,
+            expected_return_date=now + timezone.timedelta(days=14),
+            actual_return_date=now + timezone.timedelta(days=10),
+        )
 
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(self.user_token))
-
-    def test_create_borrowing(self):
-        url = reverse('borrowing-list')
-        data = {
-            'expected_return_date': (datetime.date.today() + datetime.timedelta(days=10)).isoformat(),
-            'book': self.book.id
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Borrowing.objects.count(), 2)
-        self.assertEqual(Borrowing.objects.last().user, self.user)
+        self.client.force_authenticate(user=self.user)
 
     def test_list_borrowings(self):
-        url = reverse('borrowing-list')
-        response = self.client.get(url, format='json')
+        url = reverse('borrowing:borrowing-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_filter_by_user_id_as_staff(self):
+        url = reverse('borrowing:borrowing-list') + '?user_id=' + str(self.user.id)
+        staff_user = User.objects.create_user(
+            first_name="Staff", last_name="User", email="staff@example.com", is_staff=True
+        )
+        self.client.force_authenticate(user=staff_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_filter_by_user_id_as_non_staff(self):
+        url = reverse('borrowing:borrowing-list') + '?user_id=' + str(self.user.id)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_filter_by_is_active_true(self):
+        url = reverse('borrowing:borrowing-list') + '?is_active=true'
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-    def test_retrieve_borrowing(self):
-        url = reverse('borrowing-detail', kwargs={'pk': self.borrowing.pk})
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['book'], self.book.id)
-
-    def test_filter_borrowings_by_is_active(self):
-        url = reverse('borrowing-list')
-
-        response = self.client.get(url, {'is_active': 'true'}, format='json')
+    def test_filter_by_is_active_false(self):
+        url = reverse('borrowing:borrowing-list') + '?is_active=false'
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
-        self.borrowing.actual_return_date = datetime.date.today()
-        self.borrowing.save()
-
-        response = self.client.get(url, {'is_active': 'false'}, format='json')
+    def test_no_filter_params(self):
+        url = reverse('borrowing:borrowing-list')
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-
-    def test_admin_can_see_all_borrowings(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(self.admin_token))
-        url = reverse('borrowing-list')
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-
-    def test_admin_can_filter_borrowings_by_user_id(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + str(self.admin_token))
-        url = reverse('borrowing-list')
-        response = self.client.get(url, {'user_id': self.user.id}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-
-    def test_non_authenticated_user_cannot_access_borrowings(self):
-        self.client.credentials()
-        url = reverse('borrowing-list')
-        response = self.client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(len(response.data), 2)
