@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from library.serializers import BookSerializer
 from payment.serializers import PaymentSerializer
-from .models import Borrowing
+from borrowing.models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
