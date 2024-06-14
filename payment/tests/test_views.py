@@ -35,6 +35,7 @@ class PaymentViewSetTest(APITestCase):
         self.payment = Payment.objects.create(
             borrowing=self.borrowing,
             status="PENDING",
+            payment_type="PAYMENT",
             session_url="https://example.com/",
             session_id="id_888",
             money_to_pay=15.00,
@@ -72,6 +73,7 @@ class PaymentViewSetTest(APITestCase):
         another_payment = Payment.objects.create(
             borrowing=another_borrowing,
             status="PENDING",
+            payment_type="PAYMENT",
             session_url="https://example.com/",
             session_id="id_8889",
             money_to_pay=15.00,
@@ -86,6 +88,7 @@ class PaymentViewSetTest(APITestCase):
         data = {
             "borrowing": self.borrowing.id,
             "status": "PAID",
+            "payment_type": "PAYMENT",
             "session_url": "https://example.com/",
             "session_id": "id_1111",
             "money_to_pay": 15.00,
@@ -102,6 +105,7 @@ class PaymentViewSetTest(APITestCase):
         data = {
             "borrowing": self.borrowing.id,
             "status": "PAID",
+            "payment_type": "PAYMENT",
             "session_url": self.payment.session_url,
             "session_id": self.payment.session_id,
             "money_to_pay": self.payment.money_to_pay,
