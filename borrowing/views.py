@@ -8,7 +8,7 @@ from borrowing.serializers import (
 )
 
 
-class BorrowViewSet(
+class BorrowingViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,

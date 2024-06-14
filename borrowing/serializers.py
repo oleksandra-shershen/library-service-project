@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from borrowing.models import Borrowing
 from library.serializers import BookSerializer
 from payment.serializers import PaymentSerializer
@@ -66,16 +65,18 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ("borrow_date", "user")
 
     def validate(self, attrs):
-        book = attrs.get("book")
-        if book.inventory < 1:
-            raise ValidationError("This book is not available for borrowing.")
+        book = attrs["book"]
+        if book.inventory <= 0:
+            raise serializers.ValidationError(
+                "This book is currently not available for borrowing."
+            )
         return attrs
 
     def create(self, validated_data):
+        user = self.context["request"].user
         book = validated_data["book"]
         book.inventory -= 1
         book.save()
 
-        validated_data["user"] = self.context["request"].user
-        borrowing = super().create(validated_data)
+        borrowing = Borrowing.objects.create(user=user, **validated_data)
         return borrowing
