@@ -29,7 +29,7 @@ class PaymentModelTest(TestCase):
         self.payment = Payment.objects.create(
             borrowing=self.borrowing,
             status="PENDING",
-            type="PAYMENT",
+            payment_type="PAYMENT",
             session_url="https://example.com/",
             session_id="id_888",
             money_to_pay=15.00,
@@ -38,7 +38,7 @@ class PaymentModelTest(TestCase):
     def test_payment_creation(self):
         self.assertEqual(self.payment.borrowing, self.borrowing)
         self.assertEqual(self.payment.status, "PENDING")
-        self.assertEqual(self.payment.type, "PAYMENT")
+        self.assertEqual(self.payment.payment_type, "PAYMENT")
         self.assertEqual(self.payment.session_url, "https://example.com/")
         self.assertEqual(self.payment.session_id, "id_888")
         self.assertEqual(self.payment.money_to_pay, 15.00)
@@ -55,4 +55,4 @@ class PaymentModelTest(TestCase):
 
     def test_payment_type_choices(self):
         payment = Payment.objects.get(id=self.payment.id)
-        self.assertIn(payment.type, dict(Payment.TYPE_CHOICES))
+        self.assertIn(payment.payment_type, dict(Payment.TYPE_CHOICES))
