@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: library_service_db
-          POSTGRES_USER: library_service_user
-          POSTGRES_PASSWORD: library_service_password
+          POSTGRES_DB: library-service-project
+          POSTGRES_USER: library-service-project
+          POSTGRES_PASSWORD: library-service-project
         options: >-
           --health-cmd="pg_isready -U library_service_user" 
           --health-interval=10s
@@ -26,10 +26,10 @@ jobs:
           - 5432:5432
 
     env:
-      POSTGRES_DB: library_service_db
-      POSTGRES_USER: library_service_user
-      POSTGRES_PASSWORD: library_service_password
-      POSTGRES_HOST: localhost
+      POSTGRES_DB: library-service-project
+      POSTGRES_USER: library-service-project
+      POSTGRES_PASSWORD: library-service-project
+      POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       PGDATA: /var/lib/postgresql/data
 
