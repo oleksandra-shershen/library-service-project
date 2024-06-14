@@ -14,7 +14,7 @@ from telegram.ext import (
 from telegram import Update
 from asgiref.sync import sync_to_async
 
-# Встановлення налаштувань Django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library_service.settings")
 django.setup()
 
