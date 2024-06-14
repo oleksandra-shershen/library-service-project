@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Borrowing
+
+from library.serializers import BookSerializer
+from payment.serializers import PaymentSerializer
+from borrowing.models import Borrowing
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -34,7 +37,8 @@ class BorrowingListSerializer(serializers.ModelSerializer):
 
 
 class BorrowingDetailSerializer(serializers.ModelSerializer):
-    # book = BookSerializer(many=False, read_only=True)
+    book = BookSerializer(many=False, read_only=True)
+    payments = PaymentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Borrowing
