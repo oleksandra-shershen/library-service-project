@@ -34,7 +34,6 @@ class BorrowingViewSet(
             return BorrowingReturnSerializer
         return self.serializer_class
 
-
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.request.user.is_staff:
