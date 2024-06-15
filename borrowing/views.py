@@ -1,7 +1,7 @@
-from rest_framework import mixins, status
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets
+
 from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
@@ -34,18 +34,6 @@ class BorrowingViewSet(
             return BorrowingReturnSerializer
         return self.serializer_class
 
-    @action(detail=True, methods=["POST"], url_path="return")
-    def return_borrowing(self, request, pk=None):
-        borrowing = self.get_object()
-        serializer = self.get_serializer(
-            borrowing,
-            data=request.data,
-            partial=True
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -64,3 +52,16 @@ class BorrowingViewSet(
                 queryset = queryset.exclude(actual_return_date__isnull=True)
 
         return queryset
+
+    @action(detail=True, methods=["POST"], url_path="return")
+    def return_borrowing(self, request, pk=None):
+        borrowing = self.get_object()
+        serializer = self.get_serializer(
+            borrowing,
+            data=request.data,
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
