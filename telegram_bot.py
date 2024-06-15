@@ -13,6 +13,7 @@ from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
     MessageHandler,
+    ConversationHandler,
     filters,
 )
 from telegram import Update
@@ -33,19 +34,48 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+EMAIL, FIRST_NAME, LAST_NAME = range(3)
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Hello! Please send me your email to receive notifications."
     )
+    return EMAIL
 
 
 async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    email = update.message.text
-    chat_id = update.message.chat_id
-    logger.info(f"Received email: {email} with chat_id: {chat_id}")
+    context.user_data["email"] = update.message.text
+    await update.message.reply_text(
+        "Thank you! Now, please send me your first name."
+    )
+    return FIRST_NAME
 
-    user = await sync_to_async(User.objects.filter(email=email).first)()
+
+async def get_first_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["first_name"] = update.message.text
+    await update.message.reply_text(
+        "Great! Finally, please send me your last name."
+    )
+    return LAST_NAME
+
+
+async def get_last_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["last_name"] = update.message.text
+    email = context.user_data["email"]
+    first_name = context.user_data["first_name"]
+    last_name = context.user_data["last_name"]
+    chat_id = update.message.chat_id
+
+    logger.info(
+        f"Received email: {email}, first name: {first_name}, last name: {last_name} with chat_id: {chat_id}"
+    )
+
+    user = await sync_to_async(
+        User.objects.filter(
+            email=email, first_name=first_name, last_name=last_name
+        ).first
+    )()
     if user:
         user.telegram_chat_id = chat_id
         await sync_to_async(user.save)()
@@ -54,8 +84,12 @@ async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Thank you! Your chat ID has been saved."
         )
     else:
-        logger.error(f"User with email {email} not found")
-        await update.message.reply_text("Sorry, I couldn't find that email.")
+        logger.error(
+            f"User with email {email}, first name {first_name}, and last name {last_name} not found"
+        )
+        await update.message.reply_text("Sorry, I couldn't find that user.")
+
+    return ConversationHandler.END
 
 
 async def command_all_borrowings(
@@ -97,10 +131,23 @@ async def command_upcoming_borrowings(
 def run_bot():
     application = ApplicationBuilder().token(TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(
-        MessageHandler(filters.TEXT & ~filters.COMMAND, get_email)
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("start", start)],
+        states={
+            EMAIL: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_email)
+            ],
+            FIRST_NAME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_first_name)
+            ],
+            LAST_NAME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_last_name)
+            ],
+        },
+        fallbacks=[],
     )
+
+    application.add_handler(conv_handler)
     application.add_handler(
         CommandHandler("all_borrow", command_all_borrowings)
     )
