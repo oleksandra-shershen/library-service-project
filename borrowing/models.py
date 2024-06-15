@@ -1,8 +1,7 @@
-from datetime import timezone, date
-
+from datetime import date
 from django.db import models
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
 from library.models import Book
 from library_service import settings
 
