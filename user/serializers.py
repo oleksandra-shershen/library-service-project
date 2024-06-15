@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "password",
             "is_staff",
+            "telegram_chat_id",
         )
         read_only_fields = (
             "id",
