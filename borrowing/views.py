@@ -1,14 +1,16 @@
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils import timezone
 
-from borrowing.models import Borrowing
+
+from borrowing.models import Borrowing, Payment, FINE_MULTIPLIER
 from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
     BorrowingDetailSerializer,
     BorrowingCreateSerializer,
-    BorrowingReturnSerializer
+    BorrowingReturnSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 
@@ -56,11 +58,27 @@ class BorrowingViewSet(
     def return_borrowing(self, request, pk=None):
         borrowing = self.get_object()
         serializer = self.get_serializer(
-            borrowing,
-            data=request.data,
-            partial=True
+            borrowing, data=request.data, partial=True
         )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def process_return_borrowing(self, borrowing):
+        borrowing.actual_return_date = timezone.now().date()
+        borrowing.save()
+
+        if borrowing.actual_return_date > borrowing.expected_return_date:
+            overdue_days = (borrowing.actual_return_date - borrowing.expected_return_date).days
+            fine_amount = overdue_days * borrowing.book.daily_fee * FINE_MULTIPLIER
+            Payment.objects.create(
+                borrowing=borrowing,
+                money_to_pay=fine_amount,
+                payment_type='FINE',
+                status='PENDING',
+            )
+            return {"message": f"You have a fine of {fine_amount} for returning the book late."}
+        else:
+            return {"message": "Book returned successfully."}
