@@ -22,24 +22,6 @@ def send_telegram_message(chat_id, message):
     print(response.json())
 
 
-@receiver(post_save, sender=Book)
-def send_telegram_notification(sender, instance, created, **kwargs):
-    if created:
-        users = User.objects.exclude(telegram_chat_id__isnull=True)
-        message = (
-            f"New book added: {instance.title} by {instance.author}. "
-            f"Price: ${instance.daily_fee}"
-        )
-        for user in users:
-            chat_id = user.telegram_chat_id
-            if chat_id:
-                response = requests.post(
-                    TELEGRAM_API_URL,
-                    data={"chat_id": chat_id, "text": message},
-                )
-                print(response.json())
-
-
 def send_borrowing_notification(instance_id):
     instance = Borrowing.objects.get(id=instance_id)
     user = instance.user
@@ -83,21 +65,16 @@ def check_overdue_borrowings():
     overdue_borrowings = Borrowing.objects.filter(
         expected_return_date__lte=today, actual_return_date__isnull=True
     )
-    overdue_message = ""
+    overdue_message = "Overdue borrowings:\n"
     if overdue_borrowings.exists():
         for borrowing in overdue_borrowings:
-            user = borrowing.user
             message = (
                 f"Reminder: Your borrowing is overdue!\n"
                 f"Book: {borrowing.book.title}\n"
                 f"Author: {borrowing.book.author}\n"
                 f"Due date: {borrowing.expected_return_date}\n"
             )
-            if user.telegram_chat_id:
-                async_task(
-                    send_telegram_message, user.telegram_chat_id, message
-                )
-                overdue_message += message + "\n"
+            overdue_message += message + "\n"
     else:
         overdue_message += "No borrowings overdue today!"
     return overdue_message
@@ -106,7 +83,7 @@ def check_overdue_borrowings():
 def notify_users_about_upcoming_borrowing():
     users = User.objects.exclude(telegram_chat_id__isnull=True)
     today = timezone.now().date()
-    upcoming_message = ""
+    upcoming_message = "Upcoming borrowings:\n"
     for user in users:
         nearest_borrowing = (
             Borrowing.objects.filter(
@@ -123,6 +100,7 @@ def notify_users_about_upcoming_borrowing():
                 f"Author: {nearest_borrowing.book.author}\n"
                 f"Due date: {nearest_borrowing.expected_return_date}\n"
             )
-            async_task(send_telegram_message, user.telegram_chat_id, message)
             upcoming_message += message + "\n"
+    if not upcoming_message.strip():
+        upcoming_message += "No upcoming borrowings found."
     return upcoming_message
