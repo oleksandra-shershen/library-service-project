@@ -47,9 +47,10 @@ INSTALLED_APPS = [
     # External apps
     "rest_framework_simplejwt",
     "rest_framework",
+    "django_q",
     # User apps
     "library.apps.LibraryConfig",
-    "borrowing",
+    "borrowing.apps.BorrowingConfig",
     "payment",
     "user",
 ]
@@ -165,3 +166,16 @@ SIMPLE_JWT = {
 # Telegram Bot Token
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
+
+# Django Q settings
+
+Q_CLUSTER = {
+    "name": "library_service",
+    "workers": 4,
+    "recycle": 500,
+    "timeout": 60,
+    "retry": 120,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",
+}
