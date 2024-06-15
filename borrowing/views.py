@@ -12,6 +12,8 @@ from borrowing.serializers import (
 )
 from rest_framework.permissions import IsAuthenticated
 
+from payment.views import create_payment_session
+
 
 class BorrowingViewSet(
     mixins.ListModelMixin,
@@ -64,3 +66,7 @@ class BorrowingViewSet(
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        borrowing = serializer.save(user=self.request.user)
+        create_payment_session(borrowing, self.request)

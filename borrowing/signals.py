@@ -123,8 +123,3 @@ def notify_users_about_upcoming_borrowing():
                 send_telegram_message, user.telegram_chat_id, upcoming_message
             )
 
-
-@receiver(post_save, sender=Borrowing)
-def create_borrowing_payment(sender, instance, created, **kwargs):
-    if created:
-        create_payment_session(instance)
