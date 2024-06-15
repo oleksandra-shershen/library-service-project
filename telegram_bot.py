@@ -21,7 +21,7 @@ from asgiref.sync import sync_to_async
 from borrowing.signals import (
     check_all_borrowings,
     check_overdue_borrowings,
-    notify_users_about_upcoming_borrowing,
+    get_user_upcoming_borrowings,
 )
 
 User = get_user_model()
@@ -122,10 +122,18 @@ async def command_upcoming_borrowings(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     chat_id = update.message.chat_id
-    upcoming_message = await sync_to_async(
-        notify_users_about_upcoming_borrowing
+    user = await sync_to_async(
+        User.objects.filter(telegram_chat_id=chat_id).first
     )()
-    await context.bot.send_message(chat_id=chat_id, text=upcoming_message)
+    if user:
+        upcoming_message = await sync_to_async(get_user_upcoming_borrowings)(
+            user
+        )
+        await context.bot.send_message(chat_id=chat_id, text=upcoming_message)
+    else:
+        await context.bot.send_message(
+            chat_id=chat_id, text="User not found. Please register first."
+        )
 
 
 def run_bot():
