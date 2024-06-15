@@ -20,7 +20,6 @@ from telegram import Update
 from asgiref.sync import sync_to_async
 from borrowing.signals import (
     check_all_borrowings,
-    check_overdue_borrowings,
     get_user_upcoming_borrowings,
 )
 
@@ -36,39 +35,34 @@ logger = logging.getLogger(__name__)
 
 EMAIL, FIRST_NAME, LAST_NAME = range(3)
 
+user_data = {}
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Hello! Please send me your email to receive notifications."
-    )
+    await update.message.reply_text("Hello! Please send me your email.")
     return EMAIL
 
 
 async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["email"] = update.message.text
-    await update.message.reply_text(
-        "Thank you! Now, please send me your first name."
-    )
+    user_data["email"] = update.message.text
+    await update.message.reply_text("Now, please send your first name.")
     return FIRST_NAME
 
 
 async def get_first_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["first_name"] = update.message.text
-    await update.message.reply_text(
-        "Great! Finally, please send me your last name."
-    )
+    user_data["first_name"] = update.message.text
+    await update.message.reply_text("Now, please send your last name.")
     return LAST_NAME
 
 
 async def get_last_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["last_name"] = update.message.text
-    email = context.user_data["email"]
-    first_name = context.user_data["first_name"]
-    last_name = context.user_data["last_name"]
+    user_data["last_name"] = update.message.text
     chat_id = update.message.chat_id
-
+    email = user_data["email"]
+    first_name = user_data["first_name"]
+    last_name = user_data["last_name"]
     logger.info(
-        f"Received email: {email}, first name: {first_name}, last name: {last_name} with chat_id: {chat_id}"
+        f"email: {email}, first_name: {first_name}, last_name: {last_name}"
     )
 
     user = await sync_to_async(
@@ -84,11 +78,8 @@ async def get_last_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Thank you! Your chat ID has been saved."
         )
     else:
-        logger.error(
-            f"User with email {email}, first name {first_name}, and last name {last_name} not found"
-        )
-        await update.message.reply_text("Sorry, I couldn't find that user.")
-
+        logger.error(f"User with email {email} not found")
+        await update.message.reply_text("Sorry, I couldn't find that email.")
     return ConversationHandler.END
 
 
@@ -110,14 +101,6 @@ async def command_all_borrowings(
         )
 
 
-async def command_overdue_borrowings(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
-    chat_id = update.message.chat_id
-    overdue_message = await sync_to_async(check_overdue_borrowings)()
-    await context.bot.send_message(chat_id=chat_id, text=overdue_message)
-
-
 async def command_upcoming_borrowings(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
@@ -125,15 +108,8 @@ async def command_upcoming_borrowings(
     user = await sync_to_async(
         User.objects.filter(telegram_chat_id=chat_id).first
     )()
-    if user:
-        upcoming_message = await sync_to_async(get_user_upcoming_borrowings)(
-            user
-        )
-        await context.bot.send_message(chat_id=chat_id, text=upcoming_message)
-    else:
-        await context.bot.send_message(
-            chat_id=chat_id, text="User not found. Please register first."
-        )
+    upcoming_message = await sync_to_async(get_user_upcoming_borrowings)(user)
+    await context.bot.send_message(chat_id=chat_id, text=upcoming_message)
 
 
 def run_bot():
@@ -158,9 +134,6 @@ def run_bot():
     application.add_handler(conv_handler)
     application.add_handler(
         CommandHandler("all_borrow", command_all_borrowings)
-    )
-    application.add_handler(
-        CommandHandler("overdue_borrow", command_overdue_borrowings)
     )
     application.add_handler(
         CommandHandler("upcoming_borrow", command_upcoming_borrowings)
