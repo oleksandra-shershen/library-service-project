@@ -48,8 +48,10 @@ Borrowings Service:
 Managing users' borrowings of books
 API:
 ```
-POST:             borrowings/   		                 - add new borrowing (when borrow book - inventory should be made -= 1) 
-GET:              borrowings/?user_id=...&is_active=...  - get borrowings by user id and whether is borrowing still active or not.
+POST:             borrowings/   		                 - add new borrowing 
+                                                           (when borrow book - inventory should be made -= 1) 
+GET:              borrowings/?user_id=...&is_active=...  - get borrowings by user id and whether is borrowing 
+                                                           still active or not.
 GET:              borrowings/<id>/  			         - get specific borrowing 
 POST: 	          borrowings/<id>/return/ 		         - set actual return date (inventory should be made += 1)
 ```
