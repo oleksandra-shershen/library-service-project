@@ -1,6 +1,7 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import viewsets
 from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
@@ -9,6 +10,7 @@ from borrowing.serializers import (
     BorrowingCreateSerializer,
     BorrowingReturnSerializer
 )
+from rest_framework.permissions import IsAuthenticated
 
 
 class BorrowingViewSet(
@@ -19,6 +21,7 @@ class BorrowingViewSet(
 ):
     queryset = Borrowing.objects.all().select_related("book", "user")
     serializer_class = BorrowingSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -43,3 +46,21 @@ class BorrowingViewSet(
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.request.user.is_staff:
+            user_id = self.request.query_params.get("user_id")
+            if user_id:
+                queryset = queryset.filter(user_id=user_id)
+        else:
+            queryset = queryset.filter(user=self.request.user)
+
+        is_active = self.request.query_params.get("is_active")
+        if is_active:
+            if is_active.lower() == "true":
+                queryset = queryset.filter(actual_return_date__isnull=True)
+            elif is_active.lower() == "false":
+                queryset = queryset.exclude(actual_return_date__isnull=True)
+
+        return queryset
