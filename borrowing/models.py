@@ -1,9 +1,7 @@
-from datetime import timezone
-
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from payment.models import Payment
+from django.apps import apps
 from library.models import Book
 from library_service import settings
 
@@ -48,16 +46,16 @@ class Borrowing(models.Model):
         ]
 
     def return_borrowing(self):
-        if self.actual_return_date is not None:
-            raise ValidationError("This borrowing has already been returned.")
-        self.actual_return_date = timezone.now().date()
+        if self.actual_return_date is None:
+            raise ValidationError("Actual return date is not set.")
         self.book.inventory += 1
         self.book.save()
         self.save()
 
         if self.actual_return_date > self.expected_return_date:
             overdue_days = (self.actual_return_date - self.expected_return_date).days
-            fine_amount = overdue_days * self.daily_fee * FINE_MULTIPLIER
+            fine_amount = overdue_days * self.book.daily_fee * FINE_MULTIPLIER
+            Payment = apps.get_model('payment', 'Payment')
             Payment.objects.create(
                 borrowing=self,
                 money_to_pay=fine_amount,

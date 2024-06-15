@@ -2,9 +2,10 @@ from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
+from django.apps import apps
 
 
-from borrowing.models import Borrowing, Payment, FINE_MULTIPLIER
+from borrowing.models import Borrowing
 from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
@@ -72,7 +73,8 @@ class BorrowingViewSet(
 
         if borrowing.actual_return_date > borrowing.expected_return_date:
             overdue_days = (borrowing.actual_return_date - borrowing.expected_return_date).days
-            fine_amount = overdue_days * borrowing.book.daily_fee * FINE_MULTIPLIER
+            fine_amount = overdue_days * borrowing.book.daily_fee * 2
+            Payment = apps.get_model('payment', 'Payment')
             Payment.objects.create(
                 borrowing=borrowing,
                 money_to_pay=fine_amount,

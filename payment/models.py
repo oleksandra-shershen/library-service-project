@@ -1,7 +1,5 @@
 from django.db import models
 
-from borrowing.models import Borrowing
-
 
 class Payment(models.Model):
     STATUS_CHOICES = [
@@ -21,7 +19,7 @@ class Payment(models.Model):
         max_length=7, choices=TYPE_CHOICES, default="PAYMENT"
     )
     borrowing = models.ForeignKey(
-        Borrowing, on_delete=models.CASCADE, related_name="payments"
+        'borrowing.Borrowing', on_delete=models.CASCADE, related_name="payments"
     )
     session_url = models.URLField()
     session_id = models.CharField(max_length=255)

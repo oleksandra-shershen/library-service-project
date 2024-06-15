@@ -88,5 +88,7 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
         fields = ("id", "actual_return_date")
 
     def update(self, instance, validated_data):
+        instance.actual_return_date = validated_data.get('actual_return_date', instance.actual_return_date)
+        instance.save()
         instance.return_borrowing()
         return instance
