@@ -3,6 +3,10 @@ import os
 
 import django
 from django.conf import settings
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library_service.settings")
+django.setup()
+
 from django.contrib.auth import get_user_model
 from telegram.ext import (
     ContextTypes,
@@ -13,10 +17,11 @@ from telegram.ext import (
 )
 from telegram import Update
 from asgiref.sync import sync_to_async
-
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "library_service.settings")
-django.setup()
+from borrowing.signals import (
+    check_all_borrowings,
+    check_overdue_borrowings,
+    notify_users_about_upcoming_borrowing,
+)
 
 User = get_user_model()
 
@@ -53,12 +58,47 @@ async def get_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Sorry, I couldn't find that email.")
 
 
+async def command_all_borrowings(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    chat_id = update.message.chat_id
+    borrowings_message = await sync_to_async(check_all_borrowings)()
+    await context.bot.send_message(chat_id=chat_id, text=borrowings_message)
+
+
+async def command_overdue_borrowings(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    chat_id = update.message.chat_id
+    overdue_message = await sync_to_async(check_overdue_borrowings)()
+    await context.bot.send_message(chat_id=chat_id, text=overdue_message)
+
+
+async def command_upcoming_borrowings(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+):
+    chat_id = update.message.chat_id
+    upcoming_message = await sync_to_async(
+        notify_users_about_upcoming_borrowing
+    )()
+    await context.bot.send_message(chat_id=chat_id, text=upcoming_message)
+
+
 def run_bot():
     application = ApplicationBuilder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(
         MessageHandler(filters.TEXT & ~filters.COMMAND, get_email)
+    )
+    application.add_handler(
+        CommandHandler("all_borrow", command_all_borrowings)
+    )
+    application.add_handler(
+        CommandHandler("overdue_borrow", command_overdue_borrowings)
+    )
+    application.add_handler(
+        CommandHandler("upcoming_borrow", command_upcoming_borrowings)
     )
 
     application.run_polling()

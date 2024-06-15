@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_q.tasks import async_task
 from borrowing.models import Borrowing
+from library.models import Book
 from user.models import User
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
@@ -19,6 +20,24 @@ def send_telegram_message(chat_id, message):
         data={"chat_id": chat_id, "text": message},
     )
     print(response.json())
+
+
+@receiver(post_save, sender=Book)
+def send_telegram_notification(sender, instance, created, **kwargs):
+    if created:
+        users = User.objects.exclude(telegram_chat_id__isnull=True)
+        message = (
+            f"New book added: {instance.title} by {instance.author}. "
+            f"Price: ${instance.daily_fee}"
+        )
+        for user in users:
+            chat_id = user.telegram_chat_id
+            if chat_id:
+                response = requests.post(
+                    TELEGRAM_API_URL,
+                    data={"chat_id": chat_id, "text": message},
+                )
+                print(response.json())
 
 
 def send_borrowing_notification(instance_id):
@@ -46,7 +65,6 @@ def handle_new_borrowing(sender, instance, created, **kwargs):
 
 def check_all_borrowings():
     borrowings = Borrowing.objects.all()
-    admin_users = User.objects.filter(is_staff=True)
     borrowings_message = "All borrowings:\n"
     if borrowings.exists():
         for borrowing in borrowings:
@@ -57,14 +75,7 @@ def check_all_borrowings():
             )
     else:
         borrowings_message += "No borrowings found in the database."
-
-    for admin in admin_users:
-        if admin.telegram_chat_id:
-            async_task(
-                send_telegram_message,
-                admin.telegram_chat_id,
-                borrowings_message,
-            )
+    return borrowings_message
 
 
 def check_overdue_borrowings():
@@ -72,6 +83,7 @@ def check_overdue_borrowings():
     overdue_borrowings = Borrowing.objects.filter(
         expected_return_date__lte=today, actual_return_date__isnull=True
     )
+    overdue_message = ""
     if overdue_borrowings.exists():
         for borrowing in overdue_borrowings:
             user = borrowing.user
@@ -85,20 +97,16 @@ def check_overdue_borrowings():
                 async_task(
                     send_telegram_message, user.telegram_chat_id, message
                 )
+                overdue_message += message + "\n"
     else:
-        users = User.objects.exclude(telegram_chat_id__isnull=True)
-        for user in users:
-            if user.telegram_chat_id:
-                async_task(
-                    send_telegram_message,
-                    user.telegram_chat_id,
-                    "No borrowings overdue today!",
-                )
+        overdue_message += "No borrowings overdue today!"
+    return overdue_message
 
 
 def notify_users_about_upcoming_borrowing():
     users = User.objects.exclude(telegram_chat_id__isnull=True)
     today = timezone.now().date()
+    upcoming_message = ""
     for user in users:
         nearest_borrowing = (
             Borrowing.objects.filter(
@@ -116,3 +124,5 @@ def notify_users_about_upcoming_borrowing():
                 f"Due date: {nearest_borrowing.expected_return_date}\n"
             )
             async_task(send_telegram_message, user.telegram_chat_id, message)
+            upcoming_message += message + "\n"
+    return upcoming_message
