@@ -1,52 +1,48 @@
-import stripe
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
 
-from borrowing.models import Borrowing
 from library_service import settings
-from payment.models import Payment
-from payment.serializers import (
-    PaymentSerializer,
-    PaymentListSerializer,
-    PaymentDetailSerializer,
-)
+from .models import Payment
+from .serializers import PaymentSerializer, PaymentListSerializer, PaymentDetailSerializer
+import stripe
 
 stripe.api_key = settings.STRIPE_PUBLISHABLE_KEY
 
 
-def create_session(book_title: str, unit_amount: int) -> (str, str):
-    if stripe.api_key:
-        session = stripe.checkout.Session.create(
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {"name": book_title},
-                    "unit_amount": unit_amount,
+def create_payment_session(borrowing, request):
+    amount = int(float(borrowing.get_total_price('PAYMENT')) * 100)  # Convert to cents
+    success_url = request.build_absolute_uri(reverse('payment_success'))
+    cancel_url = request.build_absolute_uri(reverse('payment_cancel'))
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                    'name': borrowing.book.title,
                 },
-                "quantity": 1
-            }],
-            mode="payment",
-            success_url="http://127.0.0.1:8001/api/payment/payment/success/",
-            cancel_url="http://127.0.0.1:8001/api/payment/payment/cancel/",
-        )
-        return session.url, session.id
-    return "", ""
-
-
-def create_payment(borrowing: Borrowing, payment_type: str):
-    money_to_pay = borrowing.get_total_price(payment_type)
-    book_title = borrowing.book.title
-    unit_amount = int(money_to_pay.replace(".", ""))
-    session_url, session_id = create_session(book_title, unit_amount)
-
-    Payment.objects.create(
-        borrowing=borrowing,
-        payment_status="PENDING",
-        payment_type=payment_type,
-        session_url=session_url,
-        session_id=session_id,
-        money_to_pay=float(money_to_pay),
+                'unit_amount': amount,
+            },
+            'quantity': 1,
+        }],
+        mode='payment',
+        success_url=success_url,
+        cancel_url=cancel_url,
     )
+
+    payment = Payment.objects.create(
+        borrowing=borrowing,
+        session_url=session.url,
+        session_id=session.id,
+        money_to_pay=amount / 100,  # Convert back to dollars
+        payment_type='PAYMENT',
+    )
+    return payment
 
 
 class PaymentViewSet(
@@ -78,3 +74,21 @@ class PaymentViewSet(
         elif self.action == "retrieve":
             return PaymentDetailSerializer
         return self.serializer_class
+
+
+@api_view(['GET'])
+def payment_success(request):
+    session_id = request.GET.get('session_id')
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status == 'paid':
+        payment = get_object_or_404(Payment, session_id=session_id)
+        payment.status = 'PAID'
+        payment.save()
+        return Response({'status': 'Payment successful'})
+    return Response({'status': 'Payment not successful'}, status=400)
+
+
+@api_view(['GET'])
+def payment_cancel(request):
+    return Response({'status': 'Payment can be completed within 24 hours'})

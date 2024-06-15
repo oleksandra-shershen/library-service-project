@@ -7,6 +7,7 @@ from django_q.tasks import async_task
 from borrowing.models import Borrowing
 from library.models import Book
 from user.models import User
+from payment.views import create_payment_session
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
 TELEGRAM_API_URL = (
@@ -121,3 +122,9 @@ def notify_users_about_upcoming_borrowing():
             async_task(
                 send_telegram_message, user.telegram_chat_id, upcoming_message
             )
+
+
+@receiver(post_save, sender=Borrowing)
+def create_borrowing_payment(sender, instance, created, **kwargs):
+    if created:
+        create_payment_session(instance)
