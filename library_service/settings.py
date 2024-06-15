@@ -26,6 +26,8 @@ SECRET_KEY = (
     "django-insecure-wwunvvr(bfxmwd" "(1*&ivx7v!u!)*nj4=c6bp6-*j0x9jfnuew="
 )
 
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
