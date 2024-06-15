@@ -10,13 +10,13 @@ from .models import Payment
 from .serializers import PaymentSerializer, PaymentListSerializer, PaymentDetailSerializer
 import stripe
 
-stripe.api_key = settings.STRIPE_PUBLISHABLE_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def create_payment_session(borrowing, request):
     amount = int(float(borrowing.get_total_price('PAYMENT')) * 100)  # Convert to cents
-    success_url = request.build_absolute_uri(reverse('payment_success'))
-    cancel_url = request.build_absolute_uri(reverse('payment_cancel'))
+    success_url = request.build_absolute_uri(reverse('payment:payment_success'))
+    cancel_url = request.build_absolute_uri(reverse('payment:payment_cancel'))
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],

@@ -67,6 +67,3 @@ class BorrowingViewSet(
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def perform_create(self, serializer):
-        borrowing = serializer.save(user=self.request.user)
-        create_payment_session(borrowing, self.request)

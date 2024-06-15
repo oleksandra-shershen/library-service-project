@@ -33,6 +33,7 @@ class PaymentListSerializer(serializers.ModelSerializer):
             "status",
             "payment_type",
             "money_to_pay",
+            "created_at"
         )
 
 

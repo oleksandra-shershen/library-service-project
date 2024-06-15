@@ -2,6 +2,7 @@ from rest_framework import serializers
 from borrowing.models import Borrowing
 from library.serializers import BookSerializer
 from payment.serializers import PaymentSerializer
+from payment.views import create_payment_session
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -79,6 +80,9 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         book.save()
 
         borrowing = Borrowing.objects.create(user=user, **validated_data)
+
+        request = self.context.get("request")
+        create_payment_session(borrowing, request)
         return borrowing
 
 
