@@ -62,8 +62,18 @@ async def command_all_borrowings(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
     chat_id = update.message.chat_id
-    borrowings_message = await sync_to_async(check_all_borrowings)()
-    await context.bot.send_message(chat_id=chat_id, text=borrowings_message)
+    user = await sync_to_async(
+        User.objects.filter(telegram_chat_id=chat_id).first
+    )()
+    if user and user.is_staff:
+        borrowings_message = await sync_to_async(check_all_borrowings)()
+        await context.bot.send_message(
+            chat_id=chat_id, text=borrowings_message
+        )
+    else:
+        await context.bot.send_message(
+            chat_id=chat_id, text="Access denied. You are not an admin."
+        )
 
 
 async def command_overdue_borrowings(
