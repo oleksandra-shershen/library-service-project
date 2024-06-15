@@ -1,8 +1,7 @@
-from datetime import timezone, date
-
+from datetime import date
 from django.db import models
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
 from library.models import Book
 from library_service import settings
 
@@ -32,14 +31,12 @@ class Borrowing(models.Model):
         if not self.borrow_date:
             self.borrow_date = date.today()
 
-        if (self.expected_return_date
-                and self.expected_return_date < self.borrow_date):
+        if self.expected_return_date and self.expected_return_date < self.borrow_date:
             raise ValidationError(
                 "Expected return date cannot be before the borrow date."
             )
 
-        if (self.actual_return_date
-                and self.actual_return_date < self.borrow_date):
+        if self.actual_return_date and self.actual_return_date < self.borrow_date:
             raise ValidationError(
                 "Actual return date cannot be before the borrow date."
             )
