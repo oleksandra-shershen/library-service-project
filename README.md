@@ -25,13 +25,13 @@ to make the service user-friendly and efficient for both library administrators 
 Books Service:
 Managing books amount (CRUD for Books)
 API:
-```
-POST:            books/           - add new 
-GET:             books/           - get a list of books
-GET:             books/<id>/      - get book's detail info 
-PUT/PATCH:       books/<id>/      - update book (also manage inventory)
-DELETE:          books/<id>/      - delete book
-```
+| Method     | Endpoint     | Description                             |
+|------------|--------------|-----------------------------------------|
+| POST       | `books/`     | Add new book                            |
+| GET        | `books/`     | Get a list of books                     |
+| GET        | `books/<id>/`| Get book's detail info                  |
+| PUT/PATCH  | `books/<id>/`| Update book (also manage inventory)     |
+| DELETE     | `books/<id>/`| Delete book                             |
 
 Users Service:
 Managing authentication & user registration
