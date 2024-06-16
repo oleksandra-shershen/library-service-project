@@ -29,7 +29,9 @@ class PaymentViewSetTest(APITestCase):
         )
 
         self.borrowing = Borrowing.objects.create(
-            user=self.regular_user, book=self.book, expected_return_date="2024-07-01"
+            user=self.regular_user,
+            book=self.book,
+            expected_return_date="2024-07-01",
         )
 
         self.payment = Payment.objects.create(
@@ -68,7 +70,9 @@ class PaymentViewSetTest(APITestCase):
             email="enouther_user@example.com", password="anotherpass"
         )
         another_borrowing = Borrowing.objects.create(
-            user=another_user, book=self.book, expected_return_date="2024-07-01"
+            user=another_user,
+            book=self.book,
+            expected_return_date="2024-07-01",
         )
         another_payment = Payment.objects.create(
             borrowing=another_borrowing,

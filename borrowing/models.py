@@ -1,10 +1,10 @@
 from datetime import timezone, datetime
 import stripe
-
+from datetime import date
 from django.db import models
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
-
 from library.models import Book
 
 
@@ -29,21 +29,30 @@ class Borrowing(models.Model):
             f"Borrowed from {self.borrow_date} to {self.expected_return_date}."
         )
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(
-                    expected_return_date__gte=models.F("borrow_date")
-                ),
-                name="expected_return_date_gte_borrow_date",
-            ),
-            models.CheckConstraint(
-                check=models.Q(
-                    actual_return_date__gte=models.F("borrow_date")
-                ),
-                name="actual_return_date_gte_borrow_date",
-            ),
-        ]
+    def clean(self):
+        if not self.borrow_date:
+            self.borrow_date = date.today()
+
+        if (self.expected_return_date
+                and self.expected_return_date < self.borrow_date):
+            raise ValidationError(
+                "Expected return date cannot be before the borrow date."
+            )
+
+        if (self.actual_return_date
+                and self.actual_return_date < self.borrow_date):
+            raise ValidationError(
+                "Actual return date cannot be before the borrow date."
+            )
+
+        if not self.pk and self.book.inventory < 1:
+            raise ValidationError(
+                f"The book '{self.book.title}' is not available for borrowing."
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def return_borrowing(self):
         if self.actual_return_date is not None:
