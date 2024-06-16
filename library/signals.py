@@ -24,8 +24,10 @@ def send_telegram_notification(sender, instance, created, **kwargs):
     if created:
         users = User.objects.exclude(telegram_chat_id__isnull=True)
         message = (
-            f"New book added: {instance.title} by {instance.author}.\n"
-            f"Price: ${instance.daily_fee}"
+            f"📚 New Book Added!\n\n"
+            f"📖 Title: {instance.title}\n"
+            f"👤 Author: {instance.author}\n"
+            f"💵 Price per day: ${instance.daily_fee:.2f}\n"
         )
         for user in users:
             chat_id = user.telegram_chat_id
