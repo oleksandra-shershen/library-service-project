@@ -35,11 +35,15 @@ class PaymentViewSet(
 
         if user.is_staff:
             queryset = Payment.objects.all().select_related(
-                "borrowing__book", "borrowing__user"
+                "borrowing__book",
+                "borrowing__user"
             )
         else:
-            queryset = Payment.objects.filter(borrowing__user=user).select_related(
-                "borrowing__book", "borrowing__user"
+            queryset = Payment.objects.filter(
+                borrowing__user=user
+            ).select_related(
+                "borrowing__book",
+                "borrowing__user"
             )
 
         return queryset
