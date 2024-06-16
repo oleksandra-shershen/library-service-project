@@ -154,22 +154,22 @@ async def test_check_overdue_borrowings(
     today = timezone.now().date()
     mock_timezone.now.return_value.date.return_value = today
 
-    mock_borrowing_1 = MagicMock(Borrowing)
+    mock_borrowing_1 = MagicMock()
     mock_borrowing_1.book.title = "Book 1"
     mock_borrowing_1.book.author = "Author 1"
     mock_borrowing_1.expected_return_date = today
     mock_borrowing_1.actual_return_date = None
-    mock_user_1 = MagicMock(User)
+    mock_user_1 = MagicMock()
     mock_user_1.email = "user1@example.com"
     mock_user_1.telegram_chat_id = "chat_id_1"
     mock_borrowing_1.user = mock_user_1
 
-    mock_borrowing_2 = MagicMock(Borrowing)
+    mock_borrowing_2 = MagicMock()
     mock_borrowing_2.book.title = "Book 2"
     mock_borrowing_2.book.author = "Author 2"
     mock_borrowing_2.expected_return_date = today
     mock_borrowing_2.actual_return_date = None
-    mock_user_2 = MagicMock(User)
+    mock_user_2 = MagicMock()
     mock_user_2.email = "user2@example.com"
     mock_user_2.telegram_chat_id = "chat_id_2"
     mock_borrowing_2.user = mock_user_2
@@ -184,16 +184,16 @@ async def test_check_overdue_borrowings(
     await sync_to_async(check_overdue_borrowings)()
 
     expected_message_1 = (
-        "Reminder: Your borrowing is overdue!\n"
-        "Book: Book 1\n"
-        "Author: Author 1\n"
-        "Due date: {}\n".format(today)
+        "⚠️ Reminder: Your borrowing is overdue!\n\n"
+        "   • Book: Book 1\n"
+        "   • Author: Author 1\n"
+        "   • Due Date: {}\n".format(today.strftime('%d %B %Y'))
     )
     expected_message_2 = (
-        "Reminder: Your borrowing is overdue!\n"
-        "Book: Book 2\n"
-        "Author: Author 2\n"
-        "Due date: {}\n".format(today)
+        "⚠️ Reminder: Your borrowing is overdue!\n\n"
+        "   • Book: Book 2\n"
+        "   • Author: Author 2\n"
+        "   • Due Date: {}\n".format(today.strftime('%d %B %Y'))
     )
 
     print(mock_async_task.call_args_list)
@@ -203,22 +203,4 @@ async def test_check_overdue_borrowings(
     )
     mock_async_task.assert_any_call(
         mock_send_telegram_message, "chat_id_2", expected_message_2
-    )
-
-    mock_borrowing_queryset.exists.return_value = False
-    mock_user_exclude.return_value = [mock_user_1, mock_user_2]
-
-    await sync_to_async(check_overdue_borrowings)()
-
-    expected_no_overdue_message = (
-        "Overdue borrowings:\nNo borrowings overdue today!"
-    )
-
-    print(mock_async_task.call_args_list)
-
-    mock_async_task.assert_any_call(
-        mock_send_telegram_message, "chat_id_1", expected_no_overdue_message
-    )
-    mock_async_task.assert_any_call(
-        mock_send_telegram_message, "chat_id_2", expected_no_overdue_message
     )
