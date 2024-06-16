@@ -1,4 +1,6 @@
 import stripe
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.reverse import reverse
@@ -49,6 +51,10 @@ class PaymentViewSet(
         elif self.action == "retrieve":
             return PaymentDetailSerializer
         return self.serializer_class
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class PaymentProcessView(APIView):
