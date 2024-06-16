@@ -27,21 +27,22 @@ class PaymentViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Payment.objects.all().select_related(
-        "borrowing__book", "borrowing__user"
-    )
     serializer_class = PaymentSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
+
         if user.is_staff:
-            return Payment.objects.all().select_related(
+            queryset = Payment.objects.all().select_related(
                 "borrowing__book", "borrowing__user"
             )
-        return Payment.objects.filter(borrowing__user=user).select_related(
-            "borrowing__book", "borrowing__user"
-        )
+        else:
+            queryset = Payment.objects.filter(borrowing__user=user).select_related(
+                "borrowing__book", "borrowing__user"
+            )
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "list":
