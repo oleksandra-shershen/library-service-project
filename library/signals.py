@@ -3,9 +3,7 @@ import requests
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django_q.tasks import async_task
 
-from borrowing.models import Borrowing
 from library.models import Book
 from user.models import User
 
@@ -58,9 +56,3 @@ def send_borrowing_notification(instance, created):
                 data={"chat_id": user.telegram_chat_id, "text": message},
             )
             print(response.json())
-
-
-@receiver(post_save, sender=Borrowing)
-def handle_new_borrowing(sender, instance, created, **kwargs):
-    if created:
-        async_task(send_borrowing_notification, instance, created)
