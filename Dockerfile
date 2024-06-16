@@ -3,9 +3,16 @@ LABEL maintainer="hornet240204@gmail.com"
 
 ENV PYTHONNBUFFERED 1
 
+RUN apk add --no-cache --update \
+    build-base \
+    postgresql-dev \
+    netcat-openbsd \
+    linux-headers
+
 WORKDIR app/
 
 COPY requirements.txt requirements.txt
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 COPY . .
