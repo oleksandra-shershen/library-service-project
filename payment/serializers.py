@@ -56,3 +56,14 @@ class PaymentDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
+
+
+class SelectedPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = (
+            "status",
+            "session_url",
+            "session_id",
+            "money_to_pay"
+        )
