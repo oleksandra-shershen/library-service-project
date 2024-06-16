@@ -45,13 +45,12 @@ python manage.py createsuperuser
 
 ## 📰 Features
 
-- **1** JWT Authentication
-- **2** Fake data for testing API
-- **3** Swagger documentation
-- **4** Docker
-- **5** Telegram Bot
-- **6** Redis as cache handler
-- **7** Stripe Payment Integration
+- JWT Authentication
+-  Swagger documentation (Coming soon)
+-  Docker
+- Telegram Bot
+- Redis as cache handler
+-  Stripe Payment Integration
 
 
 ## 🚀 Services Overview
@@ -121,6 +120,20 @@ Payments for book borrowings are processed through Stripe. The integration ensur
 - **Creating Payment Session**: A payment session is created when a user borrows a book. This session calculates the total price based on the borrowing duration and the book's daily fee.
 - **Successful Payment**: Upon successful payment, the status is updated, and a notification is sent to the user.
 - **Cancellation and Expiration**: Handle payment session cancellations and check for expired sessions regularly.
+
+## 🔄 Setting Up Django-Q
+
+To schedule periodic tasks like checking for overdue borrowings, we use Django-Q. Here's how to set it up through the admin console:
+
+1. **Access the Admin Console**: Log in to the Django admin console with your superuser account.
+2. **Navigate to Django-Q**: Find the Django-Q section and select "Schedules."
+3. **Add a New Schedule**:
+   - **Name**: Check overdue borrowings
+   - **Func**: `borrowing.signals.check_overdue_borrowings`
+   - **Schedule Type**: Choose the appropriate schedule type (e.g., hourly, daily).
+   - **Next Run**: Set the next run time.
+   - **Repeat**: Set the repeat interval if needed.
+4. **Save**: Save the schedule, and Django-Q will handle running the task at the specified intervals.
 
 ## 📝 Contributing
 
