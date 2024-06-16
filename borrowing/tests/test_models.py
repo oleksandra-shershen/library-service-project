@@ -10,22 +10,21 @@ class BorrowingModelTests(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email="testuser@test.com",
-            password="testpass123"
+            email="testuser@test.com", password="testpass123"
         )
         self.book = Book.objects.create(
             title="Test Book",
             author="Test Author",
             cover="HARD",
             inventory=5,
-            daily_fee="1.50"
+            daily_fee="1.50",
         )
 
     def test_create_borrowing(self):
         borrowing = Borrowing.objects.create(
             expected_return_date=date.today() + timedelta(days=10),
             book=self.book,
-            user=self.user
+            user=self.user,
         )
         self.assertEqual(Borrowing.objects.count(), 1)
         self.assertEqual(borrowing.book, self.book)
@@ -36,14 +35,14 @@ class BorrowingModelTests(TestCase):
             Borrowing.objects.create(
                 expected_return_date=date.today() - timedelta(days=1),
                 book=self.book,
-                user=self.user
+                user=self.user,
             )
 
     def test_actual_return_date_before_borrow_date(self):
         borrowing = Borrowing.objects.create(
             expected_return_date=date.today() + timedelta(days=10),
             book=self.book,
-            user=self.user
+            user=self.user,
         )
         borrowing.actual_return_date = date.today() - timedelta(days=1)
         with self.assertRaises(ValidationError):
@@ -56,14 +55,14 @@ class BorrowingModelTests(TestCase):
             Borrowing.objects.create(
                 expected_return_date=date.today() + timedelta(days=10),
                 book=self.book,
-                user=self.user
+                user=self.user,
             )
 
     def test_return_borrowing(self):
         borrowing = Borrowing.objects.create(
             expected_return_date=date.today() + timedelta(days=10),
             book=self.book,
-            user=self.user
+            user=self.user,
         )
         borrowing.return_borrowing()
         self.assertIsNotNone(borrowing.actual_return_date)
@@ -73,7 +72,7 @@ class BorrowingModelTests(TestCase):
         borrowing = Borrowing.objects.create(
             expected_return_date=date.today() + timedelta(days=10),
             book=self.book,
-            user=self.user
+            user=self.user,
         )
         borrowing.return_borrowing()
         with self.assertRaises(ValidationError):
