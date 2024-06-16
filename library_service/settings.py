@@ -47,9 +47,10 @@ INSTALLED_APPS = [
     # External apps
     "rest_framework_simplejwt",
     "rest_framework",
+    "django_q",
     # User apps
     "library.apps.LibraryConfig",
-    "borrowing",
+    "borrowing.apps.BorrowingConfig",
     "payment",
     "user",
 ]
@@ -166,6 +167,21 @@ SIMPLE_JWT = {
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
 
+# Stripe settings
+
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 STRIPE_API_VERSION = os.environ.get("STRIPE_API_VERSION")
 STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
+
+# Django Q settings
+
+Q_CLUSTER = {
+    "name": "library_service",
+    "workers": 4,
+    "recycle": 500,
+    "timeout": 60,
+    "retry": 120,
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",
+}

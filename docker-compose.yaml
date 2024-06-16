@@ -32,6 +32,16 @@ services:
     depends_on:
       - db
 
+  django-q:
+    build:
+      context: .
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py qcluster"
+    depends_on:
+      - db
+
   db:
     image: postgres:16.0-alpine3.17
     restart: always
