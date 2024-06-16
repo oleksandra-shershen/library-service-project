@@ -165,3 +165,7 @@ SIMPLE_JWT = {
 # Telegram Bot Token
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+STRIPE_API_VERSION = os.environ.get("STRIPE_API_VERSION")
+STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")
