@@ -61,8 +61,7 @@ class BorrowingDetailSerializer(serializers.ModelSerializer):
 class BorrowingCreateSerializer(serializers.ModelSerializer):
     payments = PaymentSerializer(many=True, read_only=True)
     book = serializers.SlugRelatedField(
-        slug_field="title",
-        queryset=Book.objects.all()
+        slug_field="title", queryset=Book.objects.all()
     )
 
     class Meta:
@@ -102,5 +101,9 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
         fields = ("id", "actual_return_date")
 
     def update(self, instance, validated_data):
+        instance.actual_return_date = validated_data.get(
+            "actual_return_date", instance.actual_return_date
+        )
         instance.return_borrowing()
+        instance.save()
         return instance
