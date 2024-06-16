@@ -26,10 +26,12 @@ def send_borrowing_notification(instance_id):
     instance = Borrowing.objects.get(id=instance_id)
     user = instance.user
     message = (
-        f"New borrowing created:\n"
-        f"Book: {instance.book.title}\n"
-        f"Author: {instance.book.author}\n"
-        f"Due date: {instance.expected_return_date}\n"
+        f"📚 New Borrowing Created!\n\n"
+        f"📝 Borrowing Details:\n"
+        f"   • Book: {instance.book.title}\n"
+        f"   • Author: {instance.book.author}\n"
+        f"   • Due Date: "
+        f"{instance.expected_return_date.strftime('%d %B %Y')}\n"
     )
     if user.telegram_chat_id:
         response = requests.post(
@@ -69,13 +71,14 @@ def handle_successful_payment(sender, instance, **kwargs):
 
 def check_all_borrowings():
     borrowings = Borrowing.objects.all()
-    borrowings_message = "All borrowings:\n"
+    borrowings_message = "📚 All Borrowings:\n\n"
     if borrowings.exists():
         for borrowing in borrowings:
             borrowings_message += (
-                f"User: {borrowing.user.email}, "
-                f"Book: {borrowing.book.title}, "
-                f"Due date: {borrowing.expected_return_date}\n"
+                f"   • User: {borrowing.user.email}\n"
+                f"   • Book: {borrowing.book.title}\n"
+                f"   • Due Date: "
+                f"{borrowing.expected_return_date.strftime('%d %B %Y')}\n\n"
             )
     else:
         borrowings_message += "No borrowings found in the database."
@@ -87,15 +90,16 @@ def check_overdue_borrowings():
     overdue_borrowings = Borrowing.objects.filter(
         expected_return_date__lte=today, actual_return_date__isnull=True
     )
-    overdue_message = "Overdue borrowings:\n"
+    overdue_message = "⏰ Overdue Borrowings:\n\n"
     if overdue_borrowings.exists():
         for borrowing in overdue_borrowings:
             user = borrowing.user
             message = (
-                f"Reminder: Your borrowing is overdue!\n"
-                f"Book: {borrowing.book.title}\n"
-                f"Author: {borrowing.book.author}\n"
-                f"Due date: {borrowing.expected_return_date}\n"
+                f"⚠️ Reminder: Your borrowing is overdue!\n\n"
+                f"   • Book: {borrowing.book.title}\n"
+                f"   • Author: {borrowing.book.author}\n"
+                f"   • Due Date: "
+                f"{borrowing.expected_return_date.strftime('%d %B %Y')}\n"
             )
             if user.telegram_chat_id:
                 async_task(
@@ -103,7 +107,7 @@ def check_overdue_borrowings():
                 )
                 overdue_message += message + "\n"
     else:
-        overdue_message += "No borrowings overdue today!"
+        overdue_message += "✅ No borrowings overdue today!"
         users = User.objects.exclude(telegram_chat_id__isnull=True)
         for user in users:
             if user.telegram_chat_id:
@@ -117,7 +121,7 @@ def check_overdue_borrowings():
 
 def get_user_upcoming_borrowings(user):
     today = timezone.now().date()
-    upcoming_message = "Upcoming borrowings:\n"
+    upcoming_message = "📚 Upcoming Borrowings:\n\n"
     nearest_borrowing = (
         Borrowing.objects.filter(user=user, expected_return_date__gte=today)
         .order_by("expected_return_date")
@@ -125,13 +129,14 @@ def get_user_upcoming_borrowings(user):
     )
     if nearest_borrowing:
         upcoming_message += (
-            f"Upcoming borrowing reminder:\n"
-            f"Book: {nearest_borrowing.book.title}\n"
-            f"Author: {nearest_borrowing.book.author}\n"
-            f"Due date: {nearest_borrowing.expected_return_date}\n"
+            f"🔔 Upcoming Borrowing Reminder:\n"
+            f"   • Book: {nearest_borrowing.book.title}\n"
+            f"   • Author: {nearest_borrowing.book.author}\n"
+            f"   • Due Date: "
+            f"{nearest_borrowing.expected_return_date.strftime('%d %B %Y')}\n"
         )
     else:
-        upcoming_message += "No upcoming borrowings found."
+        upcoming_message += "✅ No upcoming borrowings found."
     return upcoming_message
 
 
