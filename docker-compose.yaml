@@ -27,8 +27,7 @@ services:
     volumes:
       - ./:/app
     command: >
-      sh -c "
-      python telegram_bot.py"
+      sh -c "python telegram_bot.py"
     depends_on:
       - db
 
@@ -38,7 +37,8 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "python manage.py qcluster"
+      sh -c "python manage.py wait_for_db && 
+            python manage.py qcluster"
     depends_on:
       - db
 
