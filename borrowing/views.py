@@ -76,8 +76,8 @@ class BorrowingViewSet(
                     - borrowing.expected_return_date
                 ).days
                 fine_amount = overdue_days * borrowing.book.daily_fee * 2
-                Payment = apps.get_model("payment", "Payment")
-                Payment.objects.create(
+                payment = apps.get_model("payment", "Payment")
+                payment.objects.create(
                     borrowing=borrowing,
                     money_to_pay=fine_amount,
                     payment_type="FINE",
@@ -85,7 +85,9 @@ class BorrowingViewSet(
                 )
                 return Response(
                     {
-                        "message": f"You have a fine of {fine_amount} for returning the book late."
+                        "message": f"You have"
+                        f" a fine of {fine_amount}"
+                        f" for returning the book late."
                     }
                 )
             else:

@@ -76,14 +76,17 @@ class Borrowing(models.Model):
                 self.actual_return_date - self.expected_return_date
             ).days
             fine_amount = overdue_days * self.book.daily_fee * FINE_MULTIPLIER
-            Payment = apps.get_model("payment", "Payment")
-            Payment.objects.create(
+            payment = apps.get_model("payment", "Payment")
+            payment.objects.create(
                 borrowing=self,
                 money_to_pay=fine_amount,
                 payment_type="FINE",
                 status="PENDING",
             )
-            return f"You have a fine of {fine_amount} for returning the book late."
+            return (
+                f"You have a fine of"
+                f" {fine_amount} for returning the book late."
+            )
         return "Book returned successfully."
 
     def calculate_total_price(self):
