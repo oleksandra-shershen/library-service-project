@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -74,3 +76,7 @@ class BorrowingViewSet(
         except Exception as e:
             borrowing.delete()
             raise ValidationError(f"Error creating Stripe session: {e}")
+
+    @method_decorator(cache_page(60 * 60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
