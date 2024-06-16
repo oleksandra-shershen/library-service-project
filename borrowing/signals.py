@@ -30,7 +30,8 @@ def send_borrowing_notification(instance_id):
         f"📝 Borrowing Details:\n"
         f"   • Book: {instance.book.title}\n"
         f"   • Author: {instance.book.author}\n"
-        f"   • Due Date: {instance.expected_return_date.strftime('%d %B %Y')}\n"
+        f"   • Due Date: "
+        f"{instance.expected_return_date.strftime("%d %B %Y")}\n"
     )
     if user.telegram_chat_id:
         response = requests.post(
@@ -54,7 +55,8 @@ def check_all_borrowings():
             borrowings_message += (
                 f"   • User: {borrowing.user.email}\n"
                 f"   • Book: {borrowing.book.title}\n"
-                f"   • Due Date: {borrowing.expected_return_date.strftime('%d %B %Y')}\n\n"
+                f"   • Due Date: "
+                f"{borrowing.expected_return_date.strftime("%d %B %Y")}\n\n"
             )
     else:
         borrowings_message += "No borrowings found in the database."
@@ -74,7 +76,8 @@ def check_overdue_borrowings():
                 f"⚠️ Reminder: Your borrowing is overdue!\n\n"
                 f"   • Book: {borrowing.book.title}\n"
                 f"   • Author: {borrowing.book.author}\n"
-                f"   • Due Date: {borrowing.expected_return_date.strftime('%d %B %Y')}\n"
+                f"   • Due Date: "
+                f"{borrowing.expected_return_date.strftime("%d %B %Y")}\n"
             )
             if user.telegram_chat_id:
                 async_task(
@@ -107,7 +110,8 @@ def get_user_upcoming_borrowings(user):
             f"🔔 Upcoming Borrowing Reminder:\n"
             f"   • Book: {nearest_borrowing.book.title}\n"
             f"   • Author: {nearest_borrowing.book.author}\n"
-            f"   • Due Date: {nearest_borrowing.expected_return_date.strftime('%d %B %Y')}\n"
+            f"   • Due Date: "
+            f"{nearest_borrowing.expected_return_date.strftime("%d %B %Y")}\n"
         )
     else:
         upcoming_message += "✅ No upcoming borrowings found."
