@@ -5,8 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django_q.tasks import async_task
 from borrowing.models import Borrowing
-from library.models import Book
 from user.models import User
+from payment.models import Payment
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TOKEN")
 TELEGRAM_API_URL = (
@@ -43,6 +43,28 @@ def send_borrowing_notification(instance_id):
 def handle_new_borrowing(sender, instance, created, **kwargs):
     if created:
         async_task(send_borrowing_notification, instance.id)
+
+
+@receiver(post_save, sender=Payment)
+def handle_successful_payment(sender, instance, **kwargs):
+    if instance.status == "PAID":
+        borrowing = instance.borrowing
+        user = borrowing.user
+        message = (
+            f"📚 Payment Successful!\n\n"
+            f"📝 Borrowing Details:\n"
+            f"   • Book: {borrowing.book.title}\n"
+            f"   • Author: {borrowing.book.author}\n"
+            f"   • Borrowed On: {borrowing.borrow_date.strftime('%d %B %Y')}\n"
+            f"   • Due Date: "
+            f"{borrowing.expected_return_date.strftime('%d %B %Y')}\n\n"
+            f"💵 Payment Details:\n"
+            f"   • Amount Paid: ${instance.money_to_pay / 100:.2f}\n"
+            f"   • Payment Type: {instance.get_payment_type_display()}\n\n"
+            f"Thank you for using our library services!"
+        )
+        if user.telegram_chat_id:
+            async_task(send_telegram_message, user.telegram_chat_id, message)
 
 
 def check_all_borrowings():
