@@ -36,6 +36,7 @@ requests==2.32.3
 rpds-py==0.18.1
 setuptools==70.0.0
 sqlparse==0.5.0
+stripe==9.11.0
 twisted==22.10.0
 tzdata==2024.1
 uritemplate==4.1.1
