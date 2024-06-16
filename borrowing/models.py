@@ -1,4 +1,4 @@
-from datetime import timezone, datetime
+from datetime import datetime
 import stripe
 from datetime import date
 from django.db import models
