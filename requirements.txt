@@ -31,6 +31,7 @@ pytest-trio==0.8.0
 pytest-twisted==1.13.4
 pytz==2024.1
 PyYAML==6.0.1
+redis==3.5.3
 referencing==0.35.1
 requests==2.32.3
 rpds-py==0.18.1
