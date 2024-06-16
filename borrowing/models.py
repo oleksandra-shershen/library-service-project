@@ -1,11 +1,16 @@
 from datetime import datetime
-import stripe
 from datetime import date
+
+import stripe
+from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
+
 from library.models import Book
+
+FINE_MULTIPLIER = 2
 
 
 class Borrowing(models.Model):
@@ -33,14 +38,18 @@ class Borrowing(models.Model):
         if not self.borrow_date:
             self.borrow_date = date.today()
 
-        if (self.expected_return_date
-                and self.expected_return_date < self.borrow_date):
+        if (
+            self.expected_return_date
+            and self.expected_return_date < self.borrow_date
+        ):
             raise ValidationError(
                 "Expected return date cannot be before the borrow date."
             )
 
-        if (self.actual_return_date
-                and self.actual_return_date < self.borrow_date):
+        if (
+            self.actual_return_date
+            and self.actual_return_date < self.borrow_date
+        ):
             raise ValidationError(
                 "Actual return date cannot be before the borrow date."
             )
@@ -62,6 +71,21 @@ class Borrowing(models.Model):
         self.book.save()
         self.save()
 
+        if self.actual_return_date > self.expected_return_date:
+            overdue_days = (
+                self.actual_return_date - self.expected_return_date
+            ).days
+            fine_amount = overdue_days * self.book.daily_fee * FINE_MULTIPLIER
+            Payment = apps.get_model("payment", "Payment")
+            Payment.objects.create(
+                borrowing=self,
+                money_to_pay=fine_amount,
+                payment_type="FINE",
+                status="PENDING",
+            )
+            return f"You have a fine of {fine_amount} for returning the book late."
+        return "Book returned successfully."
+
     def calculate_total_price(self):
         today = datetime.now().date()
         days_borrowed = (self.expected_return_date - today).days
@@ -72,26 +96,29 @@ class Borrowing(models.Model):
 
     def create_stripe_session(self):
         from payment.models import Payment  # Lazy import
+
         stripe.api_key = settings.STRIPE_SECRET_KEY
 
         total_price = self.calculate_total_price()
 
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "product_data": {
-                        "name": self.book.title,
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": self.book.title,
+                        },
+                        "unit_amount": total_price,
                     },
-                    "unit_amount": total_price,
-                },
-                "quantity": 1,
-            }],
+                    "quantity": 1,
+                }
+            ],
             mode="payment",
             success_url="http://localhost:8000/api/payment/completed/"
-                        + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="http://localhost:8000/api/payment/canceled/"
+            + "?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="http://localhost:8000/api/payment/canceled/",
         )
 
         payment = Payment.objects.create(
