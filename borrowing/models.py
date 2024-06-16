@@ -57,7 +57,8 @@ class Borrowing(models.Model):
         today = datetime.now().date()
         days_borrowed = (self.expected_return_date - today).days
         total_price = self.book.daily_fee * days_borrowed
-        total_price = int(total_price * 100)    # Stripe expects amount in cents
+        # Stripe expects amount in cents
+        total_price = int(total_price * 100)
         return total_price
 
     def create_stripe_session(self):
@@ -79,7 +80,8 @@ class Borrowing(models.Model):
                 "quantity": 1,
             }],
             mode="payment",
-            success_url="http://localhost:8000/api/payment/completed/" + "?session_id={CHECKOUT_SESSION_ID}",
+            success_url="http://localhost:8000/api/payment/completed/"
+                        + "?session_id={CHECKOUT_SESSION_ID}",
             cancel_url="http://localhost:8000/api/payment/canceled/"
         )
 

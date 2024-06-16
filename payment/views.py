@@ -69,7 +69,10 @@ class PaymentProcessView(APIView):
 
         session_data["line_items"].append({
             "price_data": {
-                "unit_amount": int(borrowing.borrowing.calculate_total_price() * Decimal("100")),
+                "unit_amount": int(
+                    borrowing.borrowing.calculate_total_price()
+                    * Decimal("100")
+                ),
                 "currency": "usd",
                 "product_data": {
                     "name": borrowing.borrowing.book.title,
@@ -80,9 +83,15 @@ class PaymentProcessView(APIView):
 
         try:
             session = stripe.checkout.Session.create(**session_data)
-            return Response({"url": session.url}, status=status.HTTP_303_SEE_OTHER)
+            return Response(
+                {"url": session.url},
+                status=status.HTTP_303_SEE_OTHER
+            )
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PaymentCompletedView(APIView):
@@ -90,18 +99,29 @@ class PaymentCompletedView(APIView):
         session_id = request.query_params.get("session_id")
 
         if not session_id:
-            return Response({"error": "Session ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Session ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             payment = Payment.objects.get(session_id=session_id)
             payment.status = "PAID"
             payment.save()
-            return Response({"message": "Payment successful"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Payment successful"},
+                status=status.HTTP_200_OK
+            )
         except Payment.DoesNotExist:
-            return Response({"error": "Invalid session ID"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid session ID"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PaymentCanceledView(APIView):
     def get(self, request, *args, **kwargs):
-        return Response({"message": "Payment canceled"}, status=status.HTTP_200_OK)
-
+        return Response(
+            {"message": "Payment canceled"},
+            status=status.HTTP_200_OK
+        )
