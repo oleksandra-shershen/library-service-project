@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from borrowing.models import Borrowing
 from borrowing.serializers import (
@@ -43,3 +44,11 @@ class BorrowingViewSet(
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        borrowing = serializer.save()
+        try:
+            borrowing.create_stripe_session()
+        except Exception as e:
+            borrowing.delete()
+            raise ValidationError(f"Error creating Stripe session: {e}")
