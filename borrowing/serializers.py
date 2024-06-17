@@ -92,7 +92,8 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
         if pending_payments.exists():
             send_pending_payment_notification(user)
             raise serializers.ValidationError(
-                "You have pending payments. Please complete the payments before borrowing a new book."
+                "You have pending payments. "
+                "Please complete the payments before borrowing a new book."
             )
         return attrs
 

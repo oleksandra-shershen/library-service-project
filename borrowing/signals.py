@@ -43,7 +43,8 @@ def send_borrowing_notification(instance_id):
 
 
 def send_pending_payment_notification(user):
-    message = "⚠️ You have pending payments. Please complete the payments before borrowing a new book."
+    message = ("⚠️ You have pending payments. "
+               "Please complete the payments before borrowing a new book.")
     if user.telegram_chat_id:
         send_telegram_message(user.telegram_chat_id, message)
 
