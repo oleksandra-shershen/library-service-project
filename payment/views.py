@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.reverse import reverse
 
 from payment.models import Payment
+from payment.schemas import PaymentSchema
 from payment.serializers import (
     PaymentSerializer,
     PaymentListSerializer,
@@ -22,6 +23,8 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = settings.STRIPE_API_VERSION
 
 
+@method_decorator(name="list", decorator=PaymentSchema.list_schema)
+@method_decorator(name="retrieve", decorator=PaymentSchema.retrieve)
 class PaymentViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -58,6 +61,10 @@ class PaymentViewSet(
         return super().list(request, *args, **kwargs)
 
 
+@method_decorator(
+    name="create",
+    decorator=PaymentSchema.payment_process_schema
+)
 class PaymentProcessView(APIView):
     def post(self, request, *args, **kwargs):
         borrowing_id = request.data.get("borrowing_id")
@@ -101,6 +108,10 @@ class PaymentProcessView(APIView):
             )
 
 
+@method_decorator(
+    name="list",
+    decorator=PaymentSchema.payment_completed_schema
+)
 class PaymentCompletedView(APIView):
     def get(self, request, *args, **kwargs):
         session_id = request.query_params.get("session_id")
@@ -125,6 +136,7 @@ class PaymentCompletedView(APIView):
             )
 
 
+@method_decorator(name="list", decorator=PaymentSchema.payment_canceled_schema)
 class PaymentCanceledView(APIView):
     def get(self, request, *args, **kwargs):
         return Response(

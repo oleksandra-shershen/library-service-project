@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.apps import apps
 
 from borrowing.models import Borrowing
+from borrowing.schemas import BorrowingSchema
 from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
@@ -18,6 +19,12 @@ from borrowing.serializers import (
 from rest_framework.permissions import IsAuthenticated
 
 
+@method_decorator(name="list", decorator=BorrowingSchema.list_schema)
+@method_decorator(name="retrieve", decorator=BorrowingSchema.retrieve)
+@method_decorator(
+    name="return_borrowing",
+    decorator=BorrowingSchema.return_borrowing
+)
 class BorrowingViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
