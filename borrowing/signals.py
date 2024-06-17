@@ -15,6 +15,7 @@ TELEGRAM_API_URL = (
 
 FINE_MULTIPLIER = 2
 
+
 def send_telegram_message(chat_id, message):
     response = requests.post(
         TELEGRAM_API_URL,
@@ -122,8 +123,13 @@ def check_overdue_borrowings():
 
 @receiver(post_save, sender=Borrowing)
 def handle_return_borrowing(sender, instance, **kwargs):
-    if instance.actual_return_date and instance.actual_return_date > instance.expected_return_date:
-        overdue_days = (instance.actual_return_date - instance.expected_return_date).days
+    if (
+        instance.actual_return_date
+        and instance.actual_return_date > instance.expected_return_date
+    ):
+        overdue_days = (
+            instance.actual_return_date - instance.expected_return_date
+        ).days
         fine_amount = overdue_days * instance.book.daily_fee * FINE_MULTIPLIER
 
         if instance.user.telegram_chat_id:
@@ -132,14 +138,19 @@ def handle_return_borrowing(sender, instance, **kwargs):
                 f"📝 Borrowing Details:\n"
                 f"   • Book: {instance.book.title}\n"
                 f"   • Author: {instance.book.author}\n"
-                f"   • Due Date: {instance.expected_return_date.strftime('%d %B %Y')}\n"
-                f"   • Actual Return Date: {instance.actual_return_date.strftime('%d %B %Y')}\n\n"
+                f"   • Due Date: "
+                f"{instance.expected_return_date.strftime('%d %B %Y')}\n"
+                f"   • Actual Return Date: "
+                f"{instance.actual_return_date.strftime('%d %B %Y')}\n\n"
                 f"💵 Fine Details:\n"
                 f"   • Amount Due: ${fine_amount / 100:.2f}\n"
                 f"Please complete the payment to avoid further penalties."
             )
-            async_task(send_telegram_message, instance.user.telegram_chat_id, fine_message)
-
+            async_task(
+                send_telegram_message,
+                instance.user.telegram_chat_id,
+                fine_message,
+            )
 
 
 def get_user_upcoming_borrowings(user):
