@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from borrowing.models import Borrowing
+from borrowing.signals import send_pending_payment_notification
 from library.models import Book
 from library.serializers import BookSerializer
 from payment.models import Payment
@@ -89,6 +90,7 @@ class BorrowingCreateSerializer(serializers.ModelSerializer):
             borrowing__user=user, status="PENDING"
         )
         if pending_payments.exists():
+            send_pending_payment_notification(user)
             raise serializers.ValidationError(
                 "You have pending payments. Please complete the payments before borrowing a new book."
             )
