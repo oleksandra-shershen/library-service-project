@@ -6,7 +6,7 @@ from library.serializers import BookSerializer
 
 
 class BookSchema:
-    list = extend_schema(
+    list_schema = extend_schema(
         responses={
             200: BookSerializer(many=True),
         }

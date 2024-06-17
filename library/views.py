@@ -6,7 +6,7 @@ from library.schemas import BookSchema
 from library.serializers import BookSerializer
 
 
-@method_decorator(name="list", decorator=BookSchema.list)
+@method_decorator(name="list", decorator=BookSchema.list_schema)
 @method_decorator(name="retrieve", decorator=BookSchema.retrieve)
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()

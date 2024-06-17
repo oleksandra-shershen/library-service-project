@@ -11,7 +11,7 @@ from borrowing.serializers import (
 
 
 class BorrowingSchema:
-    list = extend_schema(
+    list_schema = extend_schema(
         parameters=[
             OpenApiParameter(
                 name="is_active",

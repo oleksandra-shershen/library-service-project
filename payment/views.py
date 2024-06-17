@@ -23,7 +23,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = settings.STRIPE_API_VERSION
 
 
-@method_decorator(name="list", decorator=PaymentSchema.list)
+@method_decorator(name="list", decorator=PaymentSchema.list_schema)
 @method_decorator(name="retrieve", decorator=PaymentSchema.retrieve)
 class PaymentViewSet(
     mixins.ListModelMixin,
@@ -65,7 +65,10 @@ class PaymentViewSet(
         return super().list(request, *args, **kwargs)
 
 
-@method_decorator(name="create", decorator=PaymentSchema.payment_process_schema)
+@method_decorator(
+    name="create",
+    decorator=PaymentSchema.payment_process_schema
+)
 class PaymentProcessView(APIView):
     def post(self, request, *args, **kwargs):
         borrowing_id = request.data.get("borrowing_id")
@@ -109,7 +112,10 @@ class PaymentProcessView(APIView):
             )
 
 
-@method_decorator(name="list", decorator=PaymentSchema.payment_completed_schema)
+@method_decorator(
+    name="list",
+    decorator=PaymentSchema.payment_completed_schema
+)
 class PaymentCompletedView(APIView):
     def get(self, request, *args, **kwargs):
         session_id = request.query_params.get("session_id")
