@@ -65,15 +65,19 @@ Manage user authentication and registration.
 
 ### Borrowing Service
 
-Manage borrowings of books by users.
+Manage borrowings of books by users. Includes validation to prevent new borrowings if there are pending payments.
 
 ### Payment Service (Stripe)
 
-Handle payments for book borrowings.
+Handle payments for book borrowings and overdue fines.
 
 ### Notification Service (Telegram)
 
-Send notifications about borrowings and payments.
+Send notifications about borrowings, payments, and overdue fines. Users receive messages if they have pending payments or overdue fines.
+
+### Fine Management
+
+Calculate and manage fines for overdue book returns. Automatically create a fine payment if a book is returned late, and send a daily reminder to users about overdue fines.
 
 ## 📲 Telegram Bot Functionality
 
