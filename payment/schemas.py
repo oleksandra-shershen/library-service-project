@@ -13,6 +13,7 @@ class PaymentSchema:
     list_schema = extend_schema(
         parameters=[
             OpenApiParameter(
+                name="requested_user",
                 description="Filter by requested user if user is not staff"
                             "Return all if user is staff",
                 required=False,
@@ -38,12 +39,14 @@ class PaymentSchema:
         },
         responses={
             303: OpenApiParameter(
+                name="redirect_url",
                 description="Redirection to the Stripe payment URL",
                 type={"type": "object",
                       "properties": {"url": {"type": "string"}}},
                 required=["url"]
             ),
             400: OpenApiParameter(
+                name="error",
                 description="Error message",
                 type={"type": "object",
                       "properties": {"error": {"type": "string"}}},
@@ -65,12 +68,14 @@ class PaymentSchema:
         ],
         responses={
             200: OpenApiParameter(
+                name="message",
                 description="Payment successful message",
                 type={"type": "object",
                       "properties": {"message": {"type": "string"}}},
                 required=["message"]
             ),
             400: OpenApiParameter(
+                name="error",
                 description="Error message",
                 type={"type": "object",
                       "properties": {"error": {"type": "string"}}},
@@ -85,6 +90,7 @@ class PaymentSchema:
     payment_canceled_schema = extend_schema(
         responses={
             200: OpenApiParameter(
+                name="message",
                 description="Payment canceled message",
                 type={"type": "object",
                       "properties": {"message": {"type": "string"}}},
