@@ -31,7 +31,8 @@ def send_borrowing_notification(instance_id):
         f"   • Book: {instance.book.title}\n"
         f"   • Author: {instance.book.author}\n"
         f"   • Due Date: "
-        f"{instance.expected_return_date.strftime('%d %B %Y')}\n"
+        f"{instance.expected_return_date.strftime('%d %B %Y')}\n\n"
+        f"💳 Please complete the payment for your borrowing"
     )
     if user.telegram_chat_id:
         response = requests.post(
