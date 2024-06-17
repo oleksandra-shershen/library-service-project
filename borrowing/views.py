@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from borrowing.models import Borrowing
+from borrowing.schemas import BorrowingSchema
 from borrowing.serializers import (
     BorrowingSerializer,
     BorrowingListSerializer,
@@ -16,6 +17,9 @@ from borrowing.serializers import (
 from rest_framework.permissions import IsAuthenticated
 
 
+@method_decorator(name="list", decorator=BorrowingSchema.list)
+@method_decorator(name="retrieve", decorator=BorrowingSchema.retrieve)
+@method_decorator(name="return_borrowing", decorator=BorrowingSchema.return_borrowing)
 class BorrowingViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
