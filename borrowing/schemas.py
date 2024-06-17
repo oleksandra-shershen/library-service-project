@@ -1,4 +1,7 @@
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiParameter
+)
 
 from borrowing.serializers import (
     BorrowingListSerializer,
