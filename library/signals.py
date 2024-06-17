@@ -1,7 +1,9 @@
 import os
 import requests
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from library.models import Book
 from user.models import User
 
@@ -37,3 +39,20 @@ def send_telegram_notification(sender, instance, created, **kwargs):
                     data={"chat_id": chat_id, "text": message},
                 )
                 print(response.json())
+
+
+def send_borrowing_notification(instance, created):
+    if created:
+        user = instance.user
+        message = (
+            f"New borrowing created:\n"
+            f"Book: {instance.book.title}\n"
+            f"Author: {instance.book.author}\n"
+            f"Due date: {instance.expected_return_date}\n"
+        )
+        if user.telegram_chat_id:
+            response = requests.post(
+                TELEGRAM_API_URL,
+                data={"chat_id": user.telegram_chat_id, "text": message},
+            )
+            print(response.json())

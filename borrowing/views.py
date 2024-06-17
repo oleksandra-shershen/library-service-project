@@ -4,6 +4,8 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from django.utils import timezone
+from django.apps import apps
 
 from borrowing.models import Borrowing
 from borrowing.serializers import (
@@ -11,7 +13,7 @@ from borrowing.serializers import (
     BorrowingListSerializer,
     BorrowingDetailSerializer,
     BorrowingCreateSerializer,
-    BorrowingReturnSerializer
+    BorrowingReturnSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 
@@ -60,13 +62,37 @@ class BorrowingViewSet(
     def return_borrowing(self, request, pk=None):
         borrowing = self.get_object()
         serializer = self.get_serializer(
-            borrowing,
-            data=request.data,
-            partial=True
+            borrowing, data=request.data, partial=True
         )
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+
+            borrowing.actual_return_date = timezone.now().date()
+            borrowing.save()
+
+            if borrowing.actual_return_date > borrowing.expected_return_date:
+                overdue_days = (
+                    borrowing.actual_return_date
+                    - borrowing.expected_return_date
+                ).days
+                fine_amount = overdue_days * borrowing.book.daily_fee * 2
+                payment = apps.get_model("payment", "Payment")
+                payment.objects.create(
+                    borrowing=borrowing,
+                    money_to_pay=fine_amount,
+                    payment_type="FINE",
+                    status="PENDING",
+                )
+                return Response(
+                    {
+                        "message": f"You have"
+                        f" a fine of {fine_amount}"
+                        f" for returning the book late."
+                    }
+                )
+            else:
+                return Response({"message": "Book returned successfully."})
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):

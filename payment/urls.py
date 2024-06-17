@@ -4,7 +4,7 @@ from payment.views import (
     PaymentViewSet,
     PaymentCompletedView,
     PaymentCanceledView,
-    PaymentProcessView
+    PaymentProcessView,
 )
 
 router = DefaultRouter()

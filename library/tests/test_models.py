@@ -12,7 +12,7 @@ class BookModelTests(TestCase):
             author="Test Author",
             cover="HARD",
             inventory=10,
-            daily_fee="1.50"
+            daily_fee="1.50",
         )
         self.assertEqual(Book.objects.count(), 1)
         self.assertEqual(book.title, "Test Book")
@@ -27,16 +27,13 @@ class BookModelTests(TestCase):
             author="Test Author",
             cover="HARD",
             inventory=10,
-            daily_fee="1.50"
+            daily_fee="1.50",
         )
         self.assertEqual(str(book), "Test Book")
 
     def test_default_author(self):
         book = Book.objects.create(
-            title="Test Book",
-            cover="HARD",
-            inventory=10,
-            daily_fee="1.50"
+            title="Test Book", cover="HARD", inventory=10, daily_fee="1.50"
         )
         self.assertEqual(book.author, "Unknown Author")
 
@@ -47,7 +44,7 @@ class BookModelTests(TestCase):
                 author="Test Author",
                 cover="INVALID",
                 inventory=10,
-                daily_fee="1.50"
+                daily_fee="1.50",
             )
 
     def test_positive_inventory(self):
@@ -57,7 +54,7 @@ class BookModelTests(TestCase):
                 author="Test Author",
                 cover="HARD",
                 inventory=-1,
-                daily_fee="1.50"
+                daily_fee="1.50",
             )
 
     def test_decimal_daily_fee(self):
@@ -67,5 +64,5 @@ class BookModelTests(TestCase):
                 author="Test Author",
                 cover="HARD",
                 inventory=10,
-                daily_fee="invalid"
+                daily_fee="invalid",
             )

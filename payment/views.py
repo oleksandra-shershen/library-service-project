@@ -37,16 +37,12 @@ class PaymentViewSet(
 
         if user.is_staff:
             queryset = Payment.objects.all().select_related(
-                "borrowing__book",
-                "borrowing__user"
+                "borrowing__book", "borrowing__user"
             )
         else:
             queryset = Payment.objects.filter(
                 borrowing__user=user
-            ).select_related(
-                "borrowing__book",
-                "borrowing__user"
-            )
+            ).select_related("borrowing__book", "borrowing__user")
 
         return queryset
 
@@ -75,33 +71,33 @@ class PaymentProcessView(APIView):
             "client_reference_id": borrowing.id,
             "success_url": success_url,
             "cancel_url": cancel_url,
-            "line_items": []
+            "line_items": [],
         }
 
-        session_data["line_items"].append({
-            "price_data": {
-                "unit_amount": int(
-                    borrowing.borrowing.calculate_total_price()
-                    * Decimal("100")
-                ),
-                "currency": "usd",
-                "product_data": {
-                    "name": borrowing.borrowing.book.title,
+        session_data["line_items"].append(
+            {
+                "price_data": {
+                    "unit_amount": int(
+                        borrowing.borrowing.calculate_total_price()
+                        * Decimal("100")
+                    ),
+                    "currency": "usd",
+                    "product_data": {
+                        "name": borrowing.borrowing.book.title,
+                    },
                 },
-            },
-            "quantity": 1,
-        })
+                "quantity": 1,
+            }
+        )
 
         try:
             session = stripe.checkout.Session.create(**session_data)
             return Response(
-                {"url": session.url},
-                status=status.HTTP_303_SEE_OTHER
+                {"url": session.url}, status=status.HTTP_303_SEE_OTHER
             )
         except Exception as e:
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -112,7 +108,7 @@ class PaymentCompletedView(APIView):
         if not session_id:
             return Response(
                 {"error": "Session ID is required"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
@@ -120,19 +116,17 @@ class PaymentCompletedView(APIView):
             payment.status = "PAID"
             payment.save()
             return Response(
-                {"message": "Payment successful"},
-                status=status.HTTP_200_OK
+                {"message": "Payment successful"}, status=status.HTTP_200_OK
             )
         except Payment.DoesNotExist:
             return Response(
                 {"error": "Invalid session ID"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
 class PaymentCanceledView(APIView):
     def get(self, request, *args, **kwargs):
         return Response(
-            {"message": "Payment canceled"},
-            status=status.HTTP_200_OK
+            {"message": "Payment canceled"}, status=status.HTTP_200_OK
         )
