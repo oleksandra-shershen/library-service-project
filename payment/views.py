@@ -62,7 +62,7 @@ class PaymentViewSet(
 
 
 @method_decorator(
-    name="create",
+    name="post",
     decorator=PaymentSchema.payment_process_schema
 )
 class PaymentProcessView(APIView):
@@ -109,7 +109,7 @@ class PaymentProcessView(APIView):
 
 
 @method_decorator(
-    name="list",
+    name="get",
     decorator=PaymentSchema.payment_completed_schema
 )
 class PaymentCompletedView(APIView):
@@ -136,7 +136,7 @@ class PaymentCompletedView(APIView):
             )
 
 
-@method_decorator(name="list", decorator=PaymentSchema.payment_canceled_schema)
+@method_decorator(name="get", decorator=PaymentSchema.payment_canceled_schema)
 class PaymentCanceledView(APIView):
     def get(self, request, *args, **kwargs):
         return Response(
