@@ -206,11 +206,14 @@ CACHES = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Library Service',
-    'DESCRIPTION': 'This project was created specifically for a library management system. '
-                   'It facilitates the operation of library services, including book borrowings, '
-                   'user management, and payment handling via this API.',
-    'VERSION': '1.0.0',
+    "TITLE": "Library Service",
+    "DESCRIPTION": "This project was created specifically "
+                   "for a library management system. "
+                   "It facilitates the operation of library services, "
+                   "including book borrowings, "
+                   "user management, "
+                   "and payment handling via this API.",
+    "VERSION": "1.0.0",
     "Author": "Mock team",
     "SERVICE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_SETTINGS": {
