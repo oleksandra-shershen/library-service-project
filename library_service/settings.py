@@ -157,7 +157,8 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "75/day", "user": "150/day"},
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS":
+        "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
 }
 
