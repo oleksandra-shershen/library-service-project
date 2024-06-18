@@ -61,10 +61,7 @@ class PaymentViewSet(
         return super().list(request, *args, **kwargs)
 
 
-@method_decorator(
-    name="post",
-    decorator=PaymentSchema.payment_process_schema
-)
+@method_decorator(name="post", decorator=PaymentSchema.payment_process_schema)
 class PaymentProcessView(APIView):
     def post(self, request, *args, **kwargs):
         borrowing_id = request.data.get("borrowing_id")
@@ -108,10 +105,7 @@ class PaymentProcessView(APIView):
             )
 
 
-@method_decorator(
-    name="get",
-    decorator=PaymentSchema.payment_completed_schema
-)
+@method_decorator(name="get", decorator=PaymentSchema.payment_completed_schema)
 class PaymentCompletedView(APIView):
     def get(self, request, *args, **kwargs):
         session_id = request.query_params.get("session_id")
