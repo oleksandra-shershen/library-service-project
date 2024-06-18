@@ -1,12 +1,9 @@
-from drf_spectacular.utils import (
-    extend_schema,
-    OpenApiParameter
-)
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from borrowing.serializers import (
     BorrowingListSerializer,
     BorrowingDetailSerializer,
-    BorrowingReturnSerializer
+    BorrowingReturnSerializer,
 )
 
 
@@ -31,12 +28,8 @@ class BorrowingSchema:
         },
     )
     retrieve = extend_schema(
-        responses={
-            200: BorrowingDetailSerializer()
-        },
+        responses={200: BorrowingDetailSerializer()},
     )
     return_borrowing = extend_schema(
-        responses={
-            200: BorrowingReturnSerializer()
-        }
+        responses={200: BorrowingReturnSerializer()}
     )
