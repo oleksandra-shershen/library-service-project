@@ -32,6 +32,13 @@ source venv/bin/activate
 docker-compose up --build
 ```
 
+### 📂 Install fixtures
+
+```python
+docker-compose run library sh -c "python manage.py loaddata fixtures.json"
+```
+
+
 ### 👥 Create a superuser (optional)
 
 If you want to perform all available features, create a superuser account in a new terminal:
@@ -39,6 +46,7 @@ If you want to perform all available features, create a superuser account in a n
 docker exec -it library-service-project-db-1 /bin/sh
 python manage.py createsuperuser
 ```
+
 
 ### 😄 Go to site [http://localhost:8000/](http://localhost:8000/)
 
