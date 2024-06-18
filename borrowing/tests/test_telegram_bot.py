@@ -187,13 +187,13 @@ async def test_check_overdue_borrowings(
         "⚠️ Reminder: Your borrowing is overdue!\n\n"
         "   • Book: Book 1\n"
         "   • Author: Author 1\n"
-        "   • Due Date: {}\n".format(today.strftime('%d %B %Y'))
+        "   • Due Date: {}\n".format(today.strftime("%d %B %Y"))
     )
     expected_message_2 = (
         "⚠️ Reminder: Your borrowing is overdue!\n\n"
         "   • Book: Book 2\n"
         "   • Author: Author 2\n"
-        "   • Due Date: {}\n".format(today.strftime('%d %B %Y'))
+        "   • Due Date: {}\n".format(today.strftime("%d %B %Y"))
     )
 
     print(mock_async_task.call_args_list)
