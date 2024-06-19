@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+from parameterized import parameterized
 
 from user.models import User
 from library.models import Book
@@ -22,43 +23,31 @@ class BorrowingTestCase(TestCase):
             inventory=2,
         )
 
-    def test_validation_errors(self):
-        # Create a borrowing instance with invalid expected_return_date
+    @parameterized.expand([
+        ("expected_return_date_past", timezone.now(), timezone.now().date() - timezone.timedelta(days=1), None),
+        ("actual_return_date_past", timezone.now(), None, timezone.now().date() - timezone.timedelta(days=1)),
+        ("book_inventory_zero", timezone.now(), None, None)
+    ])
+    def test_validation_errors(self, name, borrow_date, expected_return_date, actual_return_date):
+        if name == "book_inventory_zero":
+            self.book.inventory = 0
+            self.book.save()
+
         with self.assertRaises(ValidationError):
             Borrowing.objects.create(
                 user=self.user,
                 book=self.book,
-                borrow_date=timezone.now(),
-                expected_return_date=timezone.now().date()
-                - timezone.timedelta(days=1),
-            )
-
-        # Create a borrowing instance with invalid actual_return_date
-        with self.assertRaises(ValidationError):
-            Borrowing.objects.create(
-                user=self.user,
-                book=self.book,
-                borrow_date=timezone.now(),
-                actual_return_date=timezone.now().date()
-                - timezone.timedelta(days=1),
-            )
-
-        # Create a borrowing instance with book inventory less than 1
-        self.book.inventory = 0
-        self.book.save()
-        with self.assertRaises(ValidationError):
-            Borrowing.objects.create(
-                user=self.user, book=self.book, borrow_date=timezone.now()
+                borrow_date=borrow_date,
+                expected_return_date=expected_return_date,
+                actual_return_date=actual_return_date,
             )
 
     def test_valid_borrowing_creation(self):
-        # Create a valid borrowing instance
         borrowing = Borrowing.objects.create(
             user=self.user,
             book=self.book,
             borrow_date=timezone.now(),
-            expected_return_date=timezone.now().date()
-            + timezone.timedelta(days=7),
+            expected_return_date=timezone.now().date() + timezone.timedelta(days=7),
         )
         self.assertEqual(borrowing.user, self.user)
         self.assertEqual(borrowing.book, self.book)

@@ -2,7 +2,6 @@ from rest_framework import serializers
 from borrowing.models import Borrowing
 from borrowing.signals import send_pending_payment_notification
 from library.models import Book
-from library.serializers import BookSerializer
 from payment.models import Payment
 from payment.serializers import PaymentSerializer, SelectedPaymentSerializer
 
